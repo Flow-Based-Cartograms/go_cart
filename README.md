@@ -73,12 +73,21 @@ For our example, `map.eps` should look like:
 </p>
 
 ## Troubleshooting
+### Error: Don't understand 'm' flag!
+
+If you see the following line in your output, you may want to take a look at <a href="https://github.com/dmlc/xgboost/issues/1945" target="\_blank">this solution</a>. Once you have followed the solution from the link, follow the above instructions per usual.
+```
+FATAL:/opt/local/bin/../libexec/as/x86_64/as: I don't understand 'm' flag!
+```
+
+### Manually building the generator
+
 In case you run into problems while building the generator using the automated script, you could try manually carrying out some of the steps.
 
 #### macOS
 1. Install fftw and gcc.
 ```
-brew install fftw
+brew install fftw && brew link fftw
 brew install gcc
 ```
 2. Note down the version of `gcc` installed. For example, if `gcc-7.1.0` is installed, your version would be `7` (not 7.1.0).
@@ -88,7 +97,7 @@ brew install gcc
 cd cartogram_generator
 vi Makefile
 ```
-4. Change the line `CC = gcc` to `CC = gcc-[your-version-number]` where '_your-version-number_' is the number you noted above.
+4. Change the line `CC = gcc` to `CC = gcc-[your-version-number]` where '_your-version-number_' is the number you noted above. Then save the file using the vi command `:wq`.
 
 5. Go back to the root directory.
 ```
@@ -111,11 +120,4 @@ sudo apt-get install build-essential
 2. Make sure you are in the root directory, and then run the remaining steps.
 ```
 chmod a+x scripts/semi_autobuild.sh && scripts/semi_autobuild.sh
-```
-
-#### Error: Don't understand 'm' flag!
-
-If you see the following line in your output, you may want to take a look at <a href="https://github.com/dmlc/xgboost/issues/1945" target="\_blank">this solution</a>.
-```
-FATAL:/opt/local/bin/../libexec/as/x86_64/as: I don't understand 'm' flag!
 ```
