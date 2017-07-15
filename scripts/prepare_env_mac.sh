@@ -21,5 +21,8 @@ cartogram: \$(OBJ)
 clean:
 	rm *.o" > Makefile
 
+# Linking fftw
+brew link fftw | echo "Linking FFTW"
+
 # Returning to root directory
 cd ..

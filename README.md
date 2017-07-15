@@ -28,7 +28,7 @@ No additional dependencies. Your default `apt-get` package manager should work f
 
 2. Run the provided automatic build script (you may need to grant sudo priveleges):
 ```
-bash autobuild.sh
+chmod a+x autobuild.sh && ./autobuild.sh
 ```
 
 3. You should have an executable by the name of `cartogram` in your root directory.
@@ -97,7 +97,7 @@ cd ..
 
 6. Run the remaining steps.
 ```
-bash scripts/semi_autobuild.sh
+chmod a+x scripts/semi_autobuild.sh && scripts/semi_autobuild.sh
 ```
 
 #### Ubuntu/Debian Linux
@@ -110,7 +110,7 @@ sudo apt-get install build-essential
 
 2. Make sure you are in the root directory, and then run the remaining steps.
 ```
-bash scripts/semi_autobuild.sh
+chmod a+x scripts/semi_autobuild.sh && scripts/semi_autobuild.sh
 ```
 
 #### Error: Don't understand 'm' flag!
