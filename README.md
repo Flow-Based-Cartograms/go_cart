@@ -97,7 +97,7 @@ brew install gcc
 cd cartogram_generator
 vi Makefile
 ```
-4. Change the line `CC = gcc` to `CC = gcc-[your-version-number]` where '_your-version-number_' is the number you noted above.
+4. Change the line `CC = gcc` to `CC = gcc-[your-version-number]` where '_your-version-number_' is the number you noted above. Then save the file using the vi command `:wq`.
 
 5. Go back to the root directory.
 ```
