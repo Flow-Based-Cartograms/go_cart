@@ -75,7 +75,7 @@ For our example, `map.eps` should look like:
 ## Troubleshooting
 ### Error: Don't understand 'm' flag!
 
-If you see the following line in your output, you may want to take a look at <a href="https://github.com/dmlc/xgboost/issues/1945" target="\_blank">this solution</a>. Once you have followed the solution from the link, follow the above instructions per usual.
+If you see the following line in your output, you may want to take a look at <a href="https://github.com/dmlc/xgboost/issues/1945" target="\_blank">this solution</a>. Once you have implemented the solution from the link, follow the standard build instructions from above.
 ```
 FATAL:/opt/local/bin/../libexec/as/x86_64/as: I don't understand 'm' flag!
 ```
