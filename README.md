@@ -6,11 +6,11 @@ This readme explains how to set up and use this software. In doing so, it uses d
 ## Input data format
 The cartogram expects two input files:
 
-1. a `.gen` file containing the cartesian coordinates for the map regions under consideration. For example, for the 2016 US presidential election data we provide `low48splitMElo_conic.gen` which includes the coordinates for the boundaries of the different states.
+1. a `.gen` file containing the cartesian coordinates for the map regions under consideration. For example, for the 2016 US presidential election data we provide `usa_low48splitMElo_conic.gen` which includes the coordinates for the boundaries of the different states.
 
-2. a `.dat` file containing the data (such as population) for each region, according to which these will be scaled. For the 2016 US presidential election data we provide `electors.dat` which provides the number of electors for each state.
+2. a `.dat` file containing the data (such as population) for each region, according to which these will be scaled. For the 2016 US presidential election data we provide `usa_electors.dat` which provides the number of electors for each state.
 
-<!-- We an add some explanation about the files here if needed -->
+<!-- We can add some explanation about the files here if needed -->
 
 ## Building the cartogram generator
 
@@ -45,7 +45,19 @@ chmod a+x autobuild.sh && ./autobuild.sh
 ```
 For the provided 2016 US presidential election data, run the following command:
 ```
-./cartogram low48splitMElo_conic.gen electors.dat
+./cartogram usa_low48splitMElo_conic.gen usa_electors.dat
+```
+
+**Note:** In our repository, we also include data for India and China's GDP, segmented by their states/provinces.
+
+To generate the India GDP cartogram, run:
+```
+./cartogram india_noLD_conic.gen india_gdp.dat
+```
+
+To generate the China GDP cartogram, run:
+```
+./cartogram china_withSARandTWN_conic.gen china_gdp.dat
 ```
 
 3. You should see two generated files - `map.eps` showing the original map, and `cartogram.eps` showing the generated cartogram.
@@ -60,7 +72,7 @@ evince <filename>.eps
 ```
 Replace `<filename>` with the name of the file (`map` or `cartogram`) you wish to open.
 
-For our example, `map.eps` should look like:
+For our 2016 US election example, `map.eps` should look like:
 
 <p align="center">
 <img src ="sample_images/US_map.png" width="65%">
