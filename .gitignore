@@ -1,10 +1,13 @@
 # Compiled Source #
 ###################
+cartogram
+cartogram_generator/cartogram
 *.o
-!*.*
 
-# Generated Image Files #
-#########################
+# Generated Files #
+###################
+cartogram.gen
+area_error.dat
 *.eps
 *.pdf
 
@@ -13,4 +16,3 @@
 .DS_Store
 .DS_Store?
 ._*
-
