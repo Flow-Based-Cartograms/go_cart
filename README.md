@@ -6,9 +6,9 @@ This readme explains how to set up and use this software. In doing so, it uses d
 ## Input data format
 The cartogram expects two input files:
 
-1. a `.gen` file containing the cartesian coordinates for the map regions under consideration. For example, for the 2016 US presidential election data we provide `usa_low48splitMElo_conic.gen` which includes the coordinates for the boundaries of the different states.
+1. a `.gen` file containing the cartesian coordinates for the map regions under consideration. For example, for the 2016 US presidential election data we provide `usa_low48splitMElo_conic.gen` (in the `sample_data` folder) which includes the coordinates for the boundaries of the different states.
 
-2. a `.dat` file containing the data (such as population) for each region, according to which these will be scaled. For the 2016 US presidential election data we provide `usa_electors.dat` which provides the number of electors for each state.
+2. a `.dat` file containing the data (such as population) for each region, according to which these will be scaled. For the 2016 US presidential election data we provide `usa_electors.dat` (also in the `sample_data` folder) which provides the number of electors for each state.
 
 <!-- We can add some explanation about the files here if needed -->
 
@@ -45,19 +45,19 @@ chmod a+x autobuild.sh && ./autobuild.sh
 ```
 For the provided 2016 US presidential election data, run the following command:
 ```
-./cartogram usa_low48splitMElo_conic.gen usa_electors.dat
+./cartogram sample_data/usa_low48splitMElo_conic.gen sample_data/usa_electors.dat
 ```
 
 **Note:** In our repository, we also include data for India and China's GDP, segmented by their states/provinces.
 
 To generate the India GDP cartogram, run:
 ```
-./cartogram india_noLD_conic.gen india_gdp.dat
+./cartogram sample_data/india_noLD_conic.gen sample_data/india_gdp.dat
 ```
 
 To generate the China GDP cartogram, run:
 ```
-./cartogram china_withSARandTWN_conic.gen china_gdp.dat
+./cartogram sample_data/china_withSARandTWN_conic.gen sample_data/china_gdp.dat
 ```
 
 3. You should see two generated files - `map.eps` showing the original map, and `cartogram.eps` showing the generated cartogram.
