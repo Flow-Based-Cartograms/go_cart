@@ -1,4 +1,4 @@
-CC = gcc-7
+CC = gcc
 CFLAGS = -O3 -fopenmp -Wall
 DEPS = cartogram.h
 LIBS = -lfftw3 -lm
