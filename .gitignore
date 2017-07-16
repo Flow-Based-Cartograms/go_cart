@@ -1,0 +1,16 @@
+# Compiled Source #
+###################
+*.o
+!*.*
+
+# Generated Image Files #
+#########################
+*.eps
+*.pdf
+
+# OS Generated Files #
+######################
+.DS_Store
+.DS_Store?
+._*
+
