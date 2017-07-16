@@ -3,6 +3,8 @@ We present a fast <a href="https://en.wikipedia.org/wiki/Cartogram" target="\_bl
 
 This readme explains how to set up and use this software. In doing so, it uses data from the United States presidential election, 2016. This data is included in the repository.
 
+**Note:** Any images generated using this software should be referenced to Gastner et. al. (bibliographic citation will be made available soon).
+
 ## Input data format
 The cartogram expects two input files:
 
