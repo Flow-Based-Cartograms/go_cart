@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "cartogram.h"
 
 /**************************** Function prototypes. ***************************/
@@ -31,6 +32,7 @@ void project (BOOLEAN proj_graticule)
     }
 
   /********************* Project the polygon coordinates. ********************/
+  
   for (i=0; i<n_poly; i++)
     for (j=0; j<n_polycorn[i]; j++) {
       cartcorn[i][j].x =
@@ -61,19 +63,52 @@ void project (BOOLEAN proj_graticule)
 }
 
 /*****************************************************************************/
+/* Function to return the maximum absolute relative area error. The relative */
+/* area error is defined by:                                                 */
+/* area_on_cartogram / target_area - 1.                                      */
+/* The function also updates the arrays cart_area[] and area_err[] that are  */
+/* passed by reference.                                                      */
+
+double max_area_err (double *area_err, double *cart_area)
+{
+  double max, obj_area, sum_cart_area, sum_target_area;
+  int i, j;
+  
+  for (i=0; i<n_reg; i++) {
+    cart_area[i] = 0.0;
+    for (j=0; j<n_polyinreg[i]; j++)
+      cart_area[i] += polygon_area(n_polycorn[polyinreg[i][j]],
+				   cartcorn[polyinreg[i][j]]);
+  }
+  for (i=0, sum_target_area=0.0; i<n_reg; i++)
+    sum_target_area += target_area[i];
+  for (i=0, sum_cart_area=0.0; i<n_reg; i++)
+    sum_cart_area += cart_area[i];
+  for (i=0; i<n_reg; i++) {
+    obj_area =                         /* Objective area in cartogram units. */
+      target_area[i] * sum_cart_area / sum_target_area;
+    area_err[i] = cart_area[i] / obj_area - 1.0;
+  }
+  max = 0.0;                   /* Determine the maximum absolute area error. */
+  for (i=0; i<n_reg; i++)
+    max = MAX(max, fabs(area_err[i]));
+  
+  return max;
+}
+
+/*****************************************************************************/
 /** Function to write cartogram polygons and relative area errors to files. **/
 
 void output_to_ascii (void)
 {
-  double *cart_area, obj_area, sum_cart_area, sum_target_area;
-  FILE *err_file = fopen("error.dat", "w"),
-          *gen_file = fopen("cartogram.gen", "w");
+  FILE *err_file = fopen("area_error.dat", "w"),
+    *gen_file = fopen("cartogram.gen", "w");
   int i, j;
 
   /***************** Output of coordinates to cartogram.gen. *****************/
 
   for (i=0; i<n_poly; i++) {
-    fprintf(gen_file, "%i\n", polygon_id[i]);
+    fprintf(gen_file, "%d\n", polygon_id[i]);
     for (j=0; j<n_polycorn[i]; j++)
       fprintf(gen_file, "%f %f\n", cartcorn[i][j].x, cartcorn[i][j].y);
     fprintf(gen_file, "END\n");
@@ -81,30 +116,14 @@ void output_to_ascii (void)
   fprintf(gen_file, "END\n");
   fclose(gen_file);
 
-  /*************** Output of relative area errors to error.dat. **************/
-
-  err_file = fopen("error.dat", "w");
-  cart_area = (double*) calloc(n_reg, sizeof(double));
-  for (i=0; i<n_reg; i++)
-    for (j=0; j<n_polyinreg[i]; j++)
-      cart_area[i] += polygon_area(n_polycorn[polyinreg[i][j]],
-              cartcorn[polyinreg[i][j]]);
-  for (i=0, sum_target_area=0.0; i<n_reg; i++)
-    sum_target_area += target_area[i];
-  for (i=0, sum_cart_area=0.0; i<n_reg; i++)
-    sum_cart_area += cart_area[i];
+  /*************** Output of relative area errors to err_file. ***************/
   for (i=0; i<n_reg; i++) {
-    fprintf(err_file, "region %i: ", region_id[i]);
-    obj_area = target_area[i] * sum_cart_area / sum_target_area;
+    fprintf(err_file, "region %d: ", region_id[i]);
     fprintf(err_file,
-	          "objective area = %f, actual area = %f, relative error = %f\n",
-	          obj_area, cart_area[i], (cart_area[i]-obj_area)/obj_area);
+    	    "cartogram area = %f, relative error = %f\n",
+	    cart_area[i], area_err[i]);
   }
   fclose(err_file);
-
-  /******************************* Free memory. ******************************/
-
-  free(cart_area);
 
   return;
 }

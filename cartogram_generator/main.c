@@ -47,7 +47,7 @@
 /*     "generate" format.                                                    */
 /* (2) A postscript image of the original input is prepared as map.eps, an   */
 /*     image of the cartogram as cartogram.eps.                              */
-/* (3) The relative area errors are printed to error.dat.                    */
+/* (3) The relative area errors are printed to area_error.dat.               */
 
 /******************************** Inclusions. ********************************/
 
@@ -60,116 +60,125 @@
 
 int main(int argc, char* argv[])
 {
-  int i, j, k;
-
+  double mae;
+  int i, integration, j;
+  
   /**************************** Parameter checks. ****************************/
-
+  
   if (argc != 3) {
     fprintf(stderr, "ERROR: Use as ./cartogram input.gen target_area.dat\n");
     exit(1);
   }
-
+  
   /* The equations of motion are integrated on an lx-times-ly square grid.   */
   /* The parameter L will become max(lx, ly). Optimal values for lx and ly   */
   /* are computed in fill_with_density.c. According to the FFTW              */
   /* documentation, "transforms whose sizes are powers of 2 are especially   */
   /* fast". For reasons of efficiency, we only allow powers of 2.            */
-
+  
   if ((L <= 0) || ((L & (~L + 1)) != L)) {
     fprintf(stderr,"ERROR: L must be an integer power of 2.\n");
     exit(1);
   }
-
+  
   /* If a region contains exactly zero population, it will be replaced by    */
   /* MIN_POP_FAC times the smallest positive population in any region.       */
   /* Obviously, MIN_POP_FAC should be <1. A value around 0.2 is sensible.    */
   /* Regions of zero area cause mathematical problems and are almost never   */
   /* aesthetically desirable.                                                */
-
+  
   if (MIN_POP_FAC >= 1.0 || MIN_POP_FAC <=0.0) {
     fprintf(stderr,"ERROR: MIN_POP_FAC must be < 1.0.\n");
     exit(1);
   }
-
+  
   /* We leave some space between the edges of the lx-times-ly grid and the   */
   /* mapped regions so that the cartogram is unaffected by the particular    */
   /* choice of boundary conditions. The parameter PADDING determines how     */
   /* much space we leave. A value around 1.5 is sensible.                    */
-
+  
   if (PADDING < 1.0) {
     fprintf(stderr,"ERROR: PADDING must be >= 1.0.\n");
     exit(1);
   }
-
+  
   /***************************** Read input data. ****************************/
-
+  
   /* Read the original polygon coordinates, fill the lx-times-ly grid with   */
   /* density and print a map. rho_ft[] will be filled with the Fourier       */
   /* transform of the initial density.                                       */
-
+  
   fill_with_density1(argv[1], argv[2]);
-
+  
   /*************** Allocate memory for the projected positions. **************/
-
+  
   xproj = (double*) malloc(lx * ly * sizeof(double));
   yproj = (double*) malloc(lx * ly * sizeof(double));
   cartcorn = (POINT**) malloc(n_poly * sizeof(POINT*));
   for (i=0; i<n_poly; i++)
     cartcorn[i] = (POINT*) malloc(n_polycorn[i] * sizeof(POINT));
-
+  area_err = (double*) malloc(n_reg * sizeof(double));
+  cart_area = (double*) malloc(n_reg * sizeof(double));
+  
   /* xproj[i*ly+j] and yproj[i*ly+j] will store the current position of the  */
   /* point that started at (i+0.5, j+0.5).                                   */
-
+  
   for (i=0; i<lx; i++)
     for (j=0; j<ly; j++) {
       xproj[i*ly + j] = i + 0.5;
       yproj[i*ly + j] = j + 0.5;
     }
-
+  
   /************** First integration of the equations of motion. **************/
-
-  printf("Starting integration 1 out of %i\n", N_INTEGR);
+  
+  printf("Starting integration 1\n");
   integrate();
   project(FALSE);  /* FALSE because we do not need to project the graticule. */
-
+  mae = max_area_err(area_err, cart_area);
+  printf("max. abs. area error: %f\n", mae);
+  
   /********* Additional integrations to come closer to target areas. *********/
-
+  
   xproj2 = (double*) malloc(lx * ly * sizeof(double));
   yproj2 = (double*) malloc(lx * ly * sizeof(double));
-  for (k=1; k<N_INTEGR; k++) {
+  integration = 1;  
+  while (mae > MAX_PERMITTED_AREA_ERROR) {
     fill_with_density2();
-
+    
     /* Copy the current graticule before resetting. We will construct the    */
     /* final graticule by interpolating (xproj2, yproj2) on the basis of     */
     /* (xproj, yproj).                                                       */
-
+    
     for (i=0; i<lx; i++)
       for (j=0; j<ly; j++) {
-	      xproj2[i*ly + j] = xproj[i*ly + j];
-	      yproj2[i*ly + j] = yproj[i*ly + j];
+	xproj2[i*ly + j] = xproj[i*ly + j];
+	yproj2[i*ly + j] = yproj[i*ly + j];
       }
     for (i=0; i<lx; i++)
       for (j=0; j<ly; j++) {
       	xproj[i*ly + j] = i + 0.5;
       	yproj[i*ly + j] = j + 0.5;
       }
-    printf("Starting integration %i out of %i\n", k+1, N_INTEGR);
+    integration++;
+    printf("Starting integration %d\n", integration);
     integrate();
     project(TRUE);     /* TRUE because we need to project the graticule too. */
-
+    
     /* Overwrite xproj with xproj2. */
-
+    
     for (i=0; i<lx; i++)
       for (j=0; j<ly; j++) {
       	xproj[i*ly + j] = xproj2[i*ly + j];
       	yproj[i*ly + j] = yproj2[i*ly + j];
       }
+    mae = max_area_err(area_err, cart_area);
+    printf("max. abs. area error: %f\n", mae);
   }
   ps_figure("cartogram.eps", cartcorn);
   output_to_ascii();
-
+  
   /******************************* Free memory. ******************************/
-
+  
   fftw_destroy_plan(plan_fwd);
   fftw_free(rho_ft);
   fftw_free(rho_init);
@@ -192,6 +201,8 @@ int main(int argc, char* argv[])
   free(xproj2);
   free(yproj2);
   free(target_area);
-
+  free(area_err);
+  free(cart_area);
+  
   return 0;
 }

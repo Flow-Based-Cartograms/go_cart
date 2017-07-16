@@ -4,11 +4,19 @@
 
 /******************************** Definitions. *******************************/
 
+/* Areas on cartogram differ at most by an absolute relative error of        */
+/* MAX_PERMITTED_AREA_ERROR. That is,                                        */
+/* |area_on_cartogram / target_area - 1| <= MAX_PERMITTED_AREA_ERROR.        */
+
+#define MAX_PERMITTED_AREA_ERROR (0.01)
 #define L (512)            /* Maximum dimension of the FFT lattice is L x L. */
+
+/* If a region contains exactly zero population, it will be replaced by      */
+/* MIN_POP_FAC times the smallest positive population in any region.         */
+
 #define MIN_POP_FAC  (0.2)      /* Replace area 0 by the minimum times this. */
 #define PADDING (1.5)          /* Determines space between map and boundary. */
 #define BLUR_WIDTH (5e0)  /* Width of Gaussian blur to smoothen the density. */
-#define N_INTEGR (5)                              /* Number of integrations. */
 #define MAX_STRING_LENGTH (1000)
 #define PI (3.14159265358979323846264338327950288419716939937510)
 
@@ -32,8 +40,8 @@ typedef enum {          /* Declares an enumeration data type called BOOLEAN. */
 
 /* Variables for map. */
 
-double map_maxx, map_maxy, map_minx, map_miny, *target_area,
-  *xproj, *xproj2, *yproj, *yproj2;
+double *area_err, *cart_area, map_maxx, map_maxy, map_minx, map_miny,
+  *target_area, *xproj, *xproj2, *yproj, *yproj2;
 int max_id, n_poly, *n_polycorn, *n_polyinreg, n_reg, *polygon_id,
   **polyinreg, *region_id, *region_id_inv;
 POINT **cartcorn, **polycorn;
@@ -54,5 +62,6 @@ void ps_figure (char *ps_name, POINT **corn);
 double interpol (double x, double y, double *grid, char *zero);
 void integrate (void);
 void project (BOOLEAN proj_graticule);
+double max_area_err (double *area_err, double *cart_area);
 void output_to_ascii (void);
 

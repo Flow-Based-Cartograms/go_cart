@@ -54,7 +54,7 @@ void rescale_map (void)
     new_maxx = 0.5*(map_maxx+map_minx) + 0.5*lx*latt_const;
     new_minx = 0.5*(map_maxx+map_minx) - 0.5*lx*latt_const;
   }
-  printf("Using a %i x %i lattice with bounding box\n\t(%f %f %f %f).\n",
+  printf("Using a %d x %d lattice with bounding box\n\t(%f %f %f %f).\n",
 	 lx, ly, new_minx, new_miny, new_maxx, new_maxy);
 
   /********************* Rescale all polygon coordinates. ********************/
@@ -317,9 +317,9 @@ void fill_with_density1 (char *gen_file_name, char *area_file_name)
     exit(1);
   }
   while (fgets(line, MAX_STRING_LENGTH, area_file) != NULL) {
-    sscanf(line, "%i %lf", &id, &area);
+    sscanf(line, "%d %lf", &id, &area);
     if (id>max_id || region_id_inv[id]<0) {
-      fprintf(stderr, "ERROR: Identifier %i in area-file does not match\n",
+      fprintf(stderr, "ERROR: Identifier %d in area-file does not match\n",
 	            id);
       fprintf(stderr, "       any identifier in gen-file.\n");
       exit(1);
@@ -329,7 +329,7 @@ void fill_with_density1 (char *gen_file_name, char *area_file_name)
   fclose(area_file);
   for (i=0; i<n_reg; i++)
     if (target_area[i] < 0.0) {
-      fprintf(stderr, "ERROR: No target area for region %i.\n", region_id[i]);
+      fprintf(stderr, "ERROR: No target area for region %d.\n", region_id[i]);
       exit(1);
     }
 
