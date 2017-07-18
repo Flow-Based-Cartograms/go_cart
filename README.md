@@ -19,7 +19,7 @@ The cartogram expects two input files:
 ### Dependencies
 
 #### macOS
-You must have `Xcode Command Line Tools` and the `brew` package manager <a href="https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/" title="How to install Xcode CLT & brew?" target="\_blank">installed</a> installed (and updated) on your computer.
+You must have `Xcode Command Line Tools` and the `brew` package manager <a href="https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/" title="How to install Xcode CLT & brew?" target="\_blank">installed</a> (and updated) on your computer.
 
 #### Ubuntu/Debian Linux
 No additional dependencies. Your default `apt-get` package manager should work fine.
