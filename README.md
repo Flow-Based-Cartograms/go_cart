@@ -47,7 +47,7 @@ chmod a+x autobuild.sh && ./autobuild.sh
 ```
 For the provided 2016 US presidential election data, run the following command:
 ```
-./cartogram sample_data/usa_low48splitMElo_conic.gen sample_data/usa_electors.dat
+./cartogram sample_data/usa_low48splitME_conic.gen sample_data/usa_electors.dat
 ```
 
 **Note:** In our repository, we also include data for India and China's GDP, segmented by their states/provinces.
