@@ -41,10 +41,10 @@ typedef enum {          /* Declares an enumeration data type called BOOLEAN. */
 /* Variables for map. */
 
 double *area_err, *cart_area, map_maxx, map_maxy, map_minx, map_miny,
-  *target_area, *xproj, *xproj2, *yproj, *yproj2;
+  *target_area;
 int max_id, n_poly, *n_polycorn, *n_polyinreg, n_reg, *polygon_id,
   **polyinreg, *region_id, *region_id_inv;
-POINT **cartcorn, **polycorn;
+POINT **cartcorn, **origcorn, **polycorn, *proj, *proj2;
 
 /* Variables for digitizing the density. */
 
@@ -54,14 +54,19 @@ int lx, ly;
 
 /**************************** Function prototypes. ***************************/
 
+void set_inside_values_for_polygon (int region, int n_polycorn,
+				    POINT *polycorn, int **inside);
 double polygon_area (int ncrns, POINT *polygon);
-void fill_with_density1 (char *gen_file_name, char *area_file_name);
+void fill_with_density1 (char *gen_file_name, char *area_file_name,
+			 BOOLEAN inv);
 void fill_with_density2 (void);
 void read_gen (char *gen_file);
-void ps_figure (char *ps_name, POINT **corn);
+void ps_figure (char *ps_name, POINT **corn, POINT *proj, BOOLEAN grat);
 double interpol (double x, double y, double *grid, char *zero);
-void integrate (void);
+void ffb_integrate (void);
+void diff_integrate (void);
 void project (BOOLEAN proj_graticule);
 double max_area_err (double *area_err, double *cart_area);
 void output_to_ascii (void);
+void inv_project (void);
 

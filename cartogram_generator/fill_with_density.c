@@ -9,18 +9,15 @@
 
 /***************************** Global variables. *****************************/
 
-int **inside;
+int **xyhalfshift2reg;
 
 /**************************** Function prototypes. ***************************/
 
-void rescale_map (void);
-void set_inside_value_at_y (int i, int j, int k, int n, int l,
-			    double *poly_minx, int **inside);
-void set_inside_values_between_points (int i, int j, int k, int n,
-				       double *poly_minx, int **inside);
-void set_inside_values_for_polygon (int i, int j, double *poly_minx,
-				    int **inside);
-void set_inside_values_for_region (int i, double *poly_minx, int **inside);
+void rescale_map (BOOLEAN inv);
+void set_inside_value_at_y (int region, POINT pk, POINT pn, int l,
+			    double poly_minx, int **inside);
+void set_inside_values_between_points (int region, POINT pk, POINT pn,
+				       double poly_minx, int **inside);
 void interior (void);
 void gaussian_blur (double tot_init_area, double avg_dens);
 
@@ -28,29 +25,29 @@ void gaussian_blur (double tot_init_area, double avg_dens);
 /* Function to change coordinates from (minx, miny, maxx, maxy) to           */
 /* (0, 0, LX, LY).                                                           */
 
-void rescale_map (void)
+void rescale_map (BOOLEAN inv)
 {
   double latt_const, new_maxx, new_maxy, new_minx, new_miny;
   int i, j;
-
+  
   /* Minimum dimensions that leave enough space between map and rectangular  */
   /* boundaries.                                                             */
 
   new_maxx = 0.5 * ((1.0+PADDING)*map_maxx + (1.0-PADDING)*map_minx);
   new_minx = 0.5 * ((1.0-PADDING)*map_maxx + (1.0+PADDING)*map_minx);
   new_maxy = 0.5 * ((1.0+PADDING)*map_maxy + (1.0-PADDING)*map_miny);
-  new_miny = 0.5 * ((1.0-PADDING)*map_maxy + (1.0+PADDING)*map_miny);
-  if (map_maxx-map_minx > map_maxy-map_miny) {
+  new_miny = 0.5 * ((1.0-PADDING)*map_maxy + (1.0+PADDING)*map_miny);  
+  if (map_maxx-map_minx > map_maxy-map_miny) {    
     lx = L;
     latt_const = (new_maxx-new_minx) / L;
-    ly = 1 << ((int) (log2((new_maxy-new_miny)/latt_const)) + 1);
+    ly = 1 << ((int)ceil(log2((new_maxy-new_miny)/latt_const)));
     new_maxy = 0.5*(map_maxy+map_miny) + 0.5*ly*latt_const;
     new_miny = 0.5*(map_maxy+map_miny) - 0.5*ly*latt_const;
   }
   else {
     ly = L;
     latt_const = (new_maxy-new_miny) / L;
-    lx = 1 << ((int) (log2((new_maxx-new_minx)/latt_const)) + 1);
+    lx = 1 << ((int) ceil(log2((new_maxx-new_minx) / latt_const)));
     new_maxx = 0.5*(map_maxx+map_minx) + 0.5*lx*latt_const;
     new_minx = 0.5*(map_maxx+map_minx) - 0.5*lx*latt_const;
   }
@@ -61,37 +58,46 @@ void rescale_map (void)
 
   for (i=0; i<n_poly; i++)
     for (j=0; j<n_polycorn[i]; j++) {
-      polycorn[i][j].x = (polycorn[i][j].x-new_minx)/latt_const;
-      polycorn[i][j].y = (polycorn[i][j].y-new_miny)/latt_const;
+      polycorn[i][j].x = (polycorn[i][j].x - new_minx) / latt_const;
+      polycorn[i][j].y = (polycorn[i][j].y - new_miny) / latt_const;
     }
 
+  /*** If we wish to plot the inverse transform, we must save the original ***/
+  /*** polygon coordinates.                                                ***/
+  if (inv) {
+    origcorn = (POINT**) malloc(n_poly * sizeof(POINT*));
+    for (i=0; i<n_poly; i++)
+      origcorn[i] = (POINT*) malloc(n_polycorn[i] * sizeof(POINT));
+    for (i=0; i<n_poly; i++)
+      for (j=0; j<n_polycorn[i]; j++) {
+	origcorn[i][j].x = polycorn[i][j].x;
+	origcorn[i][j].y = polycorn[i][j].y;
+      }
+  }
+  
   return;
 }
 
 /*****************************************************************************/
-/* Function to set values of inside[][], used in interior() below. It sets   */
-/* the value in inside[][] for all x-values between poly_minx and the        */
-/* x-value (of the point on the line connecting the given two coordinates)   */
-/* that corresponds to the current y-value l.                                */
+/* Function to set values of inside[][], used in                             */
+/* set_inside_values_for_polygon() below. It sets the value in inside[][]    */
+/* for all x-values between poly_minx and the x-value (of the point on the   */
+/* line connecting the given two coordinates) that corresponds to the        */
+/* current y-value l.                                                        */
 
-void set_inside_value_at_y (int i, int j, int k, int n, int l,
-			    double *poly_minx, int **inside)
+void set_inside_value_at_y (int region, POINT pk, POINT pn, int l,
+			    double poly_minx, int **inside)
 {
-  double intersection, pkx, pky, pnx, pny;
+  double intersection;
   int m;
-
-  pkx = polycorn[polyinreg[i][j]][k].x;
-  pky = polycorn[polyinreg[i][j]][k].y;
-  pnx = polycorn[polyinreg[i][j]][n].x;
-  pny = polycorn[polyinreg[i][j]][n].y;
 
   /* x-value of the intersection between y = l and the line formed by the    */
   /* coordinates (pkx, pky) and (pnx, pny).                                  */
 
-  intersection = (pnx-0.5 - (pkx-0.5)) * (l - (pky-0.5)) /
-          (pny-0.5 - (pky-0.5)) + (pkx-0.5);
-  for (m = (int) poly_minx[polyinreg[i][j]]; m < intersection; m++)
-    inside[m][l] = i-inside[m][l]-1;
+  intersection = (pn.x-0.5 - (pk.x-0.5)) * (l - (pk.y-0.5)) /
+          (pn.y-0.5 - (pk.y-0.5)) + (pk.x-0.5);  
+  for (m = (int) poly_minx; m < intersection; m++)
+    inside[m][l] = region - inside[m][l] - 1;
 
   return;
 }
@@ -103,18 +109,15 @@ void set_inside_value_at_y (int i, int j, int k, int n, int l,
 /* coordinates on the horizontal line to the left of the line segment        */
 /* connecting the input coordinates.                                         */
 
-void set_inside_values_between_points (int i, int j, int k, int n,
-				       double *poly_minx, int **inside)
+void set_inside_values_between_points (int region, POINT pk, POINT pn,
+				       double poly_minx, int **inside)
 {
-  double max_y = MAX(polycorn[polyinreg[i][j]][n].y - 0.5,
-		      polycorn[polyinreg[i][j]][k].y - 0.5);
-  int l = (int) (MIN(polycorn[polyinreg[i][j]][n].y - 0.5,
-		      polycorn[polyinreg[i][j]][k].y - 0.5)) + 1;
-
+  int l;
+  
   /* Loop over all integer y-values between the two input y-coordinates.     */
 
-  for (; l < max_y ; l++)
-    set_inside_value_at_y(i, j, k, n, l, poly_minx, inside);
+  for (l = ceil(MIN(pn.y, pk.y) - 0.5); l < MAX(pn.y - 0.5, pk.y - 0.5); l++)
+    set_inside_value_at_y(region, pk, pn, l, poly_minx, inside);
 
   return;
 }
@@ -123,73 +126,51 @@ void set_inside_values_between_points (int i, int j, int k, int n,
 /**** Function to set values in inside[][] for a particular polygon in a  ****/
 /**** region.                                                             ****/
 
-void set_inside_values_for_polygon (int i, int j, double *poly_minx,
-				    int **inside)
+void set_inside_values_for_polygon (int region, int n_polycorn,
+				    POINT *polycorn, int **inside)
 {
+  double poly_minx = polycorn[0].x;
   int k, n;
+
+  /************ Determine the minimum x-coordinate of the polygon. ***********/
+  
+  for (k=0; k<n_polycorn; k++)
+    poly_minx = MIN(poly_minx, polycorn[k].x);
 
   /* Loop over all pairs of consecutive coordinates of polygon.              */
 
-  for (k=0, n=n_polycorn[polyinreg[i][j]]-1;
-       k<n_polycorn[polyinreg[i][j]]; n=k++)
-    set_inside_values_between_points(i, j, k, n, poly_minx, inside);
-
-  return;
-}
-
-/*****************************************************************************/
-/******* Function to set values in inside[][] for a particular region. *******/
-
-void set_inside_values_for_region (int i, double *poly_minx, int **inside)
-{
-  int j;
-
-  /* Loop over all regions in polygon j.                                     */
-
-  for (j=0; j<n_polyinreg[i]; j++)
-    set_inside_values_for_polygon(i, j, poly_minx, inside);
-
+  for (k=0, n=n_polycorn-1; k<n_polycorn; n=k++)
+    set_inside_values_between_points(region, polycorn[k], polycorn[n],
+				     poly_minx, inside);
   return;
 }
 
 /*****************************************************************************/
 /* Function to determine if a grid point at (x+0.5, y+0.5) is inside one of  */
 /* the polygons and, if yes, in which region. The result is stored in the    */
-/* array inside[x][y]. If (x,y) is outside all polygons, then inside[i][j] = */
-/* -1. If it is inside region i, then inside[x][y] = i.                      */
+/* array xyhalfshift2reg[x][y]. If (x+0.5, y+0.5) is outside all polygons,   */
+/* then xyhalfshift2reg[x][y] = -1. If it is inside region i, then           */
+/* xyhalfshift2reg[x][y] = i.                                                */
 
 void interior (void)
 {
-  double *poly_minx;
-  int i, j;
+  int i, j, poly;
 
-  /**************************** Memory allocation. ***************************/
-
-  poly_minx = (double*) malloc(n_poly * sizeof(double));
-
-  /*********** Determine the minimum x-coordinate of each polygon. ***********/
-
-  for (i=0; i<n_poly; i++) {
-    poly_minx[i] = polycorn[i][0].x;
-    for (j=0; j<n_polycorn[i]; j++)
-      poly_minx[i] = MIN(poly_minx[i], polycorn[i][j].x);
-  }
-
-  /************************** Initialize inside[][]. *************************/
+  /********************* Initialize xyhalfshift2reg[][]. *********************/
 
   for (i=0; i<lx; i++)
-    for (j=0; j<ly; j++) inside[i][j] = -1;
+    for (j=0; j<ly; j++)
+      xyhalfshift2reg[i][j] = -1;
 
   /**** Use the concept of the "crossing number" to determine the correct ****/
-  /**** values of inside[][].                                             ****/
+  /**** values of xyhalfshift2reg[][].                                    ****/
 
   for (i=0; i<n_reg; i++)
-    set_inside_values_for_region(i, poly_minx, inside);
-
-  /******************************* Free memory. ******************************/
-
-  free(poly_minx);
-
+    for (j=0; j<n_polyinreg[i]; j++) {
+      poly = polyinreg[i][j];
+      set_inside_values_for_polygon(i, n_polycorn[poly], polycorn[poly],
+				    xyhalfshift2reg);
+    }
   return;
 }
 
@@ -224,7 +205,7 @@ double polygon_area (int ncrns, POINT *polygon)
 
   for (i=0; i<ncrns-1; i++)
     area -=
-            0.5 * (polygon[i].x+polygon[i+1].x) * (polygon[i+1].y-polygon[i].y);
+      0.5 * (polygon[i].x+polygon[i+1].x) * (polygon[i+1].y-polygon[i].y);
   return area -= 0.5 * (polygon[ncrns-1].x+polygon[0].x) *
           (polygon[0].y-polygon[ncrns-1].y);
 }
@@ -262,7 +243,7 @@ void gaussian_blur (double tot_init_area, double avg_dens)
     for (j=0; j<ly; j++) {
       scale_j = (double) j /ly;
       rho_ft[i*ly+j] *=
-			        exp(prefactor * (scale_i*scale_i + scale_j*scale_j));
+	exp(prefactor * (scale_i*scale_i + scale_j*scale_j));
     }
   }
   fftw_execute(plan_bwd);      /* Transform back from Fourier to real space. */
@@ -281,7 +262,8 @@ void gaussian_blur (double tot_init_area, double avg_dens)
 /* should only be called once, namely before the first round of integration. */
 /* Afterwards use fill_with_density2() below.                                */
 
-void fill_with_density1 (char *gen_file_name, char *area_file_name)
+void fill_with_density1 (char *gen_file_name, char *area_file_name,
+			 BOOLEAN inv)
 {
   char line[MAX_STRING_LENGTH];
   double area, avg_dens, *dens, *init_area, min_area, tot_init_area,
@@ -295,12 +277,13 @@ void fill_with_density1 (char *gen_file_name, char *area_file_name)
 
   /***************** Fit the map on an (lx)*(ly)-square grid. ****************/
 
-  rescale_map();
+  rescale_map(inv);
 
   /***************************** Allocate memory. ****************************/
 
-  inside = (int**) malloc(lx * sizeof(int*));
-  for (i=0; i<lx; i++) inside[i] = (int*) malloc(ly * sizeof(int));
+  xyhalfshift2reg = (int**) malloc(lx * sizeof(int*));
+  for (i=0; i<lx; i++)
+    xyhalfshift2reg[i] = (int*) malloc(ly * sizeof(int));
   dens = (double*) malloc(n_reg * sizeof(double));
   target_area = (double*) malloc(n_reg * sizeof(double));
   init_area = (double*) calloc(n_reg, sizeof(double));
@@ -333,24 +316,24 @@ void fill_with_density1 (char *gen_file_name, char *area_file_name)
       exit(1);
     }
 
-  /************************ Print a map in eps-format. ***********************/
-  ps_figure("map.eps", polycorn);
-
   /****** Replace target areas equal to zero by a small positive value. ******/
 
   min_area = target_area[0];
   for (i=1; i<n_reg; i++)
-    if (target_area[i] > 0.0) min_area = MIN(min_area, target_area[i]);
+    if (target_area[i] > 0.0)
+      min_area = MIN(min_area, target_area[i]);
   for (i=0; i<n_reg; i++)
-    if (target_area[i] == 0.0) target_area[i] = MIN_POP_FAC * min_area;
+    if (target_area[i] == 0.0)
+      target_area[i] = MIN_POP_FAC * min_area;
 
   /**************** Calculate all initial areas and densities. ***************/
 
   for (i=0; i<n_reg; i++)
     for (j=0; j<n_polyinreg[i]; j++)
       init_area[i] += polygon_area(n_polycorn[polyinreg[i][j]],
-							polycorn[polyinreg[i][j]]);
-  for (i=0; i<n_reg; i++) dens[i] = target_area[i] / init_area[i];
+				   polycorn[polyinreg[i][j]]);
+  for (i=0; i<n_reg; i++)
+    dens[i] = target_area[i] / init_area[i];
 
   /******************** Calculate the "average density" = ********************/
   /**************** (total target area)/(total initial area). ****************/
@@ -370,8 +353,10 @@ void fill_with_density1 (char *gen_file_name, char *area_file_name)
 
   for (i=0; i<lx; i++)
     for (j=0; j<ly; j++) {
-      if (inside[i][j]==-1) rho_init[i*ly+j] = avg_dens;
-      else rho_init[i*ly+j] = dens[inside[i][j]];
+      if (xyhalfshift2reg[i][j]==-1)
+	rho_init[i*ly+j] = avg_dens;
+      else
+	rho_init[i*ly+j] = dens[xyhalfshift2reg[i][j]];
     }
 
   /*** Plan the Fourier transform already now so that it can be shared with **/
@@ -397,8 +382,8 @@ void fill_with_density1 (char *gen_file_name, char *area_file_name)
   /******************************* Free memory. ******************************/
 
   for (i=0; i<lx; i++)
-    free(inside[i]);
-  free(inside);
+    free(xyhalfshift2reg[i]);
+  free(xyhalfshift2reg);
   free(dens);
   free(init_area);
 
@@ -426,8 +411,9 @@ void fill_with_density2 (void)
 
   /***************************** Allocate memory. ****************************/
 
-  inside = (int**) malloc(lx * sizeof(int*));
-  for (i=0; i<lx; i++) inside[i] = (int*) malloc(ly * sizeof(int));
+  xyhalfshift2reg = (int**) malloc(lx * sizeof(int*));
+  for (i=0; i<lx; i++)
+    xyhalfshift2reg[i] = (int*) malloc(ly * sizeof(int));
   dens = (double*) malloc(n_reg * sizeof(double));
   tmp_area = (double*) calloc(n_reg, sizeof(double));
 
@@ -457,16 +443,18 @@ void fill_with_density2 (void)
 
   for (i=0; i<lx; i++)
     for (j=0; j<ly; j++) {
-      if (inside[i][j]==-1) rho_init[i*ly+j] = avg_dens;
-      else rho_init[i*ly+j] = dens[inside[i][j]];
+      if (xyhalfshift2reg[i][j]==-1)
+	rho_init[i*ly+j] = avg_dens;
+      else
+	rho_init[i*ly+j] = dens[xyhalfshift2reg[i][j]];
     }
   fftw_execute(plan_fwd);
 
   /******************************* Free memory. ******************************/
 
   for (i=0; i<lx; i++)
-    free(inside[i]);
-  free(inside);
+    free(xyhalfshift2reg[i]);
+  free(xyhalfshift2reg);
   free(dens);
   free(tmp_area);
 

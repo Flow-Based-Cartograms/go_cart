@@ -10,6 +10,13 @@
 /* for publication).                                                         */
 
 /* The code must be called as "./cartogram.exe input.gen target_area.dat".   */
+/* Additional arguments are                                                  */
+/* - diff: replaces the fast flow-based algorithm by the Gastner-Newman      */
+/*         diffusion method,                                                 */
+/* - inv: calculate the inverse transformation and prepare a map             */
+/*        (invtransf.eps) that shows the original polygon coordinates        */
+/*        together with a graticule where each deformed quadrilateral        */
+/*        contains equal population.                                         */
 /* The input coordinates in the first command-line argument must be in       */
 /* ArcInfo "generate" format of the type:                                    */
 
@@ -25,7 +32,7 @@
 /* ...                                                                       */
 /* 0.333358 -0.200693                                                        */
 /* END                                                                       */
-/* 2301 Maine01              IDs can repeat if a region constists of         */
+/* 2301 Maine01              IDs can repeat if a region consists of          */
 /* 0.334699 -0.204771        multiple polygons.                              */
 /* ...                                                                       */
 /* 0.334699 -0.204771                                                        */
@@ -54,22 +61,51 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fftw3.h>
+#include <string.h>
 #include "cartogram.h"
+
+/************* Error message for unknown command-line arguments. *************/
+
+void addl_comm_arg_err (void)
+{
+  fprintf(stderr, "Additional optional arguments that can be passed:\n");
+  fprintf(stderr, "diff: use Gastner-Newman (i.e. diffusion) ");
+  fprintf(stderr, "instead of fast flow-based method\n");
+  fprintf(stderr, "inv:  print inverse transform to file\n");
+  exit(1);
+}
 
 /*********************************** Main. ***********************************/
 
-int main(int argc, char* argv[])
+int main (int argc, char* argv[])
 {
+  BOOLEAN diff, inv;
   double mae;
   int i, integration, j;
   
-  /**************************** Parameter checks. ****************************/
-  
-  if (argc != 3) {
+  /**************************** Parse the command. ***************************/
+
+  if (argc < 3) {
     fprintf(stderr, "ERROR: Use as ./cartogram input.gen target_area.dat\n");
-    exit(1);
+    addl_comm_arg_err();
   }
-  
+  diff = FALSE;
+  inv = FALSE;
+  for (i=3; i<argc; i++) {
+    if (!diff && strcmp(argv[i], "diff") == 0) {
+      diff = TRUE;
+      printf("Using Gastner-Newman (i.e. diffusion) method\n");
+    }
+    else if (!inv && strcmp(argv[i], "inv") == 0) {
+      inv = TRUE;
+      printf("Will print inverse transform\n");
+    }
+    else if (strcmp(argv[i], "diff") != 0 && strcmp(argv[i], "inv") != 0) {
+      fprintf(stderr, "\nERROR: Unknown command-line argument %s\n", argv[i]);
+      addl_comm_arg_err();
+    }
+  }
+    
   /* The equations of motion are integrated on an lx-times-ly square grid.   */
   /* The parameter L will become max(lx, ly). Optimal values for lx and ly   */
   /* are computed in fill_with_density.c. According to the FFTW              */
@@ -108,74 +144,89 @@ int main(int argc, char* argv[])
   /* density and print a map. rho_ft[] will be filled with the Fourier       */
   /* transform of the initial density.                                       */
   
-  fill_with_density1(argv[1], argv[2]);
+  fill_with_density1(argv[1], argv[2], inv);
   
   /*************** Allocate memory for the projected positions. **************/
   
-  xproj = (double*) malloc(lx * ly * sizeof(double));
-  yproj = (double*) malloc(lx * ly * sizeof(double));
+  proj = (POINT*) malloc(lx * ly * sizeof(POINT));
   cartcorn = (POINT**) malloc(n_poly * sizeof(POINT*));
   for (i=0; i<n_poly; i++)
     cartcorn[i] = (POINT*) malloc(n_polycorn[i] * sizeof(POINT));
   area_err = (double*) malloc(n_reg * sizeof(double));
   cart_area = (double*) malloc(n_reg * sizeof(double));
   
-  /* xproj[i*ly+j] and yproj[i*ly+j] will store the current position of the  */
-  /* point that started at (i+0.5, j+0.5).                                   */
+  /* proj[i*ly+j] will store the current position of the point that started  */
+  /* at (i+0.5, j+0.5).                                                      */
   
   for (i=0; i<lx; i++)
     for (j=0; j<ly; j++) {
-      xproj[i*ly + j] = i + 0.5;
-      yproj[i*ly + j] = j + 0.5;
+      proj[i*ly + j].x = i + 0.5;
+      proj[i*ly + j].y = j + 0.5;
     }
+  
+  /* Print a map of the input coordinates in eps-format. The last argument   */
+  /* is FALSE because we do not need to show the graticule.                  */
+  ps_figure("map.eps", polycorn, proj, FALSE); 
   
   /************** First integration of the equations of motion. **************/
   
   printf("Starting integration 1\n");
-  integrate();
+  if (!diff)
+    ffb_integrate();
+  else
+    diff_integrate();
   project(FALSE);  /* FALSE because we do not need to project the graticule. */
   mae = max_area_err(area_err, cart_area);
   printf("max. abs. area error: %f\n", mae);
   
   /********* Additional integrations to come closer to target areas. *********/
   
-  xproj2 = (double*) malloc(lx * ly * sizeof(double));
-  yproj2 = (double*) malloc(lx * ly * sizeof(double));
+  proj2 = (POINT*) malloc(lx * ly * sizeof(POINT));
   integration = 1;  
   while (mae > MAX_PERMITTED_AREA_ERROR) {
     fill_with_density2();
     
     /* Copy the current graticule before resetting. We will construct the    */
-    /* final graticule by interpolating (xproj2, yproj2) on the basis of     */
-    /* (xproj, yproj).                                                       */
+    /* final graticule by interpolating proj2 on the basis of proj.          */
     
     for (i=0; i<lx; i++)
       for (j=0; j<ly; j++) {
-	xproj2[i*ly + j] = xproj[i*ly + j];
-	yproj2[i*ly + j] = yproj[i*ly + j];
+	proj2[i*ly + j].x = proj[i*ly + j].x;
+	proj2[i*ly + j].y = proj[i*ly + j].y;
       }
     for (i=0; i<lx; i++)
       for (j=0; j<ly; j++) {
-      	xproj[i*ly + j] = i + 0.5;
-      	yproj[i*ly + j] = j + 0.5;
+      	proj[i*ly + j].x = i + 0.5;
+      	proj[i*ly + j].y = j + 0.5;
       }
     integration++;
     printf("Starting integration %d\n", integration);
-    integrate();
+    if (!diff)
+      ffb_integrate();
+    else
+      diff_integrate();
     project(TRUE);     /* TRUE because we need to project the graticule too. */
-    
-    /* Overwrite xproj with xproj2. */
+
+    /* Overwrite proj with proj2. */
     
     for (i=0; i<lx; i++)
       for (j=0; j<ly; j++) {
-      	xproj[i*ly + j] = xproj2[i*ly + j];
-      	yproj[i*ly + j] = yproj2[i*ly + j];
+      	proj[i*ly + j].x = proj2[i*ly + j].x;
+      	proj[i*ly + j].y = proj2[i*ly + j].y;
       }
     mae = max_area_err(area_err, cart_area);
     printf("max. abs. area error: %f\n", mae);
   }
-  ps_figure("cartogram.eps", cartcorn);
-  output_to_ascii();
+
+  /* Print the cartogram in eps-format. Set the final argument to TRUE if    */
+  /* you want to add the graticule.                                          */
+  
+  ps_figure("cartogram.eps", cartcorn, proj, FALSE);
+
+  /* Print additional output files. */
+  output_to_ascii();    /* Print coordinates in .gen format and area errors. */
+  if (inv)
+    inv_project();        /* Show the graticules from the inverse transform. */
   
   /******************************* Free memory. ******************************/
   
@@ -196,13 +247,15 @@ int main(int argc, char* argv[])
     free(polyinreg[i]);
   free(polyinreg);
   free(n_polyinreg);
-  free(xproj);
-  free(yproj);
-  free(xproj2);
-  free(yproj2);
+  free(proj);
+  free(proj2);
   free(target_area);
   free(area_err);
   free(cart_area);
-  
+  if (inv) {
+    for (i=0; i<n_poly; i++)
+      free(origcorn[i]);
+    free(origcorn);
+  }
   return 0;
 }

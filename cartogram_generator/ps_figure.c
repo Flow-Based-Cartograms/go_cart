@@ -4,9 +4,13 @@
 #include <stdlib.h>
 #include "cartogram.h"
 
+/******************************** Definitions. *******************************/
+/* Number of graticule lines to be plotted along the longer dimension. */
+#define GRAT_LINES (64)
+
 /******************** Function to prepare postscript map. ********************/
 
-void ps_figure (char *ps_name, POINT **corn)
+void ps_figure (char *ps_name, POINT **corn, POINT *prj, BOOLEAN grat)
 {
   FILE *ps_file;
   int i, j, k;
@@ -43,6 +47,25 @@ void ps_figure (char *ps_name, POINT **corn)
     }
     fprintf(ps_file, "gsave\n0.5 SGRY f\ngrestore\n0 SGRY s\n");
   }
+
+  /********************* If grat = TRUE, plot graticule. *********************/
+  
+  if (grat) {
+    fprintf(ps_file, "0.3 SLW 0 0 1 SRGB\n");
+    for (j=0; j<ly; j += MAX(lx, ly)/GRAT_LINES) {
+      fprintf(ps_file, "%f %f m\n", prj[j].x, prj[j].y);
+      for (i=1; i<lx; i++)
+	fprintf(ps_file, "%f %f l\n", prj[i*ly+j].x, prj[i*ly+j].y);
+      fprintf(ps_file, "s\n");
+    }
+    for (i=0; i<lx; i += MAX(lx, ly)/GRAT_LINES) {
+      fprintf(ps_file, "%f %f m\n", prj[i*ly].x, prj[i*ly].y);
+      for (j=1; j<ly; j++)
+	fprintf(ps_file, "%f %f l\n", prj[i*ly+j].x, prj[i*ly+j].y);
+      fprintf(ps_file, "s\n");
+    }
+  }
+  
   fprintf(ps_file, "showpage\n");
   
   fclose(ps_file);

@@ -1,8 +1,8 @@
-CC = gcc
+CC = gcc-7
 CFLAGS = -O3 -fopenmp -Wall
 DEPS = cartogram.h
 LIBS = -lfftw3 -lm
-OBJ = main.o cartogram.o integrate.o read_gen.o ps_figure.o fill_with_density.o
+OBJ = main.o cartogram.o ffb_integrate.o diff_integrate.o read_gen.o ps_figure.o fill_with_density.o
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
