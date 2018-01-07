@@ -8,7 +8,7 @@ This readme explains how to set up and use this software. In doing so, it uses d
 ## Input data format
 The cartogram expects two input files:
 
-1. a `.gen` file containing the cartesian coordinates for the map regions under consideration. For example, for the 2016 US presidential election data we provide `usa_low48splitME_conic.gen` (in the `sample_data` folder) which includes the coordinates for the boundaries of the different states.
+1. a `.gen` file containing the Cartesian coordinates for the map regions under consideration. For example, for the 2016 US presidential election data we provide `usa_low48splitME_conic.gen` (in the `sample_data` folder) which includes the coordinates for the boundaries of the different states.
 
 2. a `.dat` file containing the data (such as population) for each region, according to which these will be scaled. For the 2016 US presidential election data we provide `usa_electors.dat` (also in the `sample_data` folder) which provides the number of electors for each state.
 
