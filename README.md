@@ -11,7 +11,8 @@ M. Gastner, V. Seguy and P. More, "Fast flow-based algorithm for creating densit
 
 ```
 @article{gastner_seguy_more_2018,
-	title={Fast flow-based algorithm for creating density-equalizing map projections}, 	author={Gastner, Michael T. and Seguy, Vivien and More, Pratyush},
+	title={Fast flow-based algorithm for creating density-equalizing map projections},
+	author={Gastner, Michael T. and Seguy, Vivien and More, Pratyush},
 	DOI={10.1073/pnas.1712674115},
 	journal={Proceedings of the National Academy of Sciences of the United States of America},
 	year={2018},
