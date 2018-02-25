@@ -5,7 +5,7 @@ This readme explains how to set up and use this software. In doing so, it uses d
 
 **Note:** Any images generated using this software should be referenced to:
 
-M. Gastner, V. Seguy and P. More, "Fast flow-based algorithm for creating density-equalizing map projections", *Proceedings of the National Academy of Sciences USA*, p. 201712674, 2018.
+Gastner, M., Seguy, V., & More, P. (2018). Fast flow-based algorithm for creating density-equalizing map projections. *Proceedings Of The National Academy Of Sciences USA*, p.201712674.
 
 **BibTeX Entry:**
 
