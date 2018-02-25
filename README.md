@@ -1,9 +1,23 @@
 # Flow-Based Cartogram Generator
-We present a fast <a href="https://en.wikipedia.org/wiki/Cartogram" target="\_blank" title="What are Cartograms?">cartogram</a> generator written in C. It uses the flow-based algorithm devised by <a href="" target="\_blank">Gastner et. al.</a>
+We present a fast <a href="https://en.wikipedia.org/wiki/Cartogram" target="\_blank" title="What are Cartograms?">cartogram</a> generator written in C. It uses the flow-based algorithm devised by <a href="https://doi.org/10.1073/pnas.1712674115" target="\_blank">Gastner, Seguy & More</a>.
 
 This readme explains how to set up and use this software. In doing so, it uses data from the United States presidential election, 2016. This data is included in the repository.
 
-**Note:** Any images generated using this software should be referenced to Gastner et. al. (bibliographic citation will be made available soon).
+**Note:** Any images generated using this software should be referenced to:
+
+M. Gastner, V. Seguy and P. More, "Fast flow-based algorithm for creating density-equalizing map projections", *Proceedings of the National Academy of Sciences USA*, p. 201712674, 2018.
+
+**BibTeX Entry:**
+
+```
+@article{gastner_seguy_more_2018,
+	title={Fast flow-based algorithm for creating density-equalizing map projections}, 	author={Gastner, Michael T. and Seguy, Vivien and More, Pratyush},
+	DOI={10.1073/pnas.1712674115},
+	journal={Proceedings of the National Academy of Sciences of the United States of America},
+	year={2018},
+	pages={201712674}
+}
+```
 
 ## Input data format
 The cartogram expects two input files:
