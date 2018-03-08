@@ -5,7 +5,7 @@ This readme explains how to set up and use this software. In doing so, it uses d
 
 **Note:** Any images generated using this software should be referenced to:
 
-Gastner, M., Seguy, V., & More, P. (2018). Fast flow-based algorithm for creating density-equalizing map projections. *Proceedings of the National Academy of Sciences USA*, p.201712674.
+Gastner, M., Seguy, V., & More, P. (2018). Fast flow-based algorithm for creating density-equalizing map projections. *Proceedings of the National Academy of Sciences USA*, **101**:E2156-E2164.
 
 **BibTeX Entry:**
 
@@ -16,7 +16,9 @@ Gastner, M., Seguy, V., & More, P. (2018). Fast flow-based algorithm for creatin
 	DOI={10.1073/pnas.1712674115},
 	journal={Proceedings of the National Academy of Sciences of the United States of America},
 	year={2018},
-	pages={201712674}
+	volume = {115},
+  number = {10},
+  pages = {E2156--E2164}
 }
 ```
 
