@@ -17,8 +17,8 @@ Gastner, M., Seguy, V., & More, P. (2018). Fast flow-based algorithm for creatin
 	journal={Proceedings of the National Academy of Sciences of the United States of America},
 	year={2018},
 	volume = {115},
-  number = {10},
-  pages = {E2156--E2164}
+	number = {10},
+	pages = {E2156--E2164}
 }
 ```
 
