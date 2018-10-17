@@ -1,6 +1,6 @@
 
 <p align="center">
-<img src ="sample_images/logo.jpg" width="65%">
+<img src ="sample_images/logo-trimmed.jpg" width="65%">
 <img src ="sample_images/detail.jpg" width="65%">
 </p>
 
