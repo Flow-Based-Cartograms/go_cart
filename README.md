@@ -1,3 +1,10 @@
+
+<p align="center">
+<img src ="sample_images/logo.jpg" width="65%">
+</p>
+
+<hr>
+
 # Flow-Based Cartogram Generator
 We present a fast <a href="https://en.wikipedia.org/wiki/Cartogram" target="\_blank" title="What are Cartograms?">cartogram</a> generator written in C. It uses the flow-based algorithm devised by <a href="https://doi.org/10.1073/pnas.1712674115" target="\_blank">Gastner, Seguy & More</a>.
 
