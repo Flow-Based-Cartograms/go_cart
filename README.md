@@ -6,6 +6,11 @@
 
 <hr>
 
+[![release](http://github-release-version.herokuapp.com/github/Flow-Based-Cartograms/go_cart/release.svg?style=flat)](https://github.com/Flow-Based-Cartograms/go_cart/releases/latest)
+[![Maintenance](https://img.shields.io/badge/maintained-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
+[![HitCount](http://hits.dwyl.io/Flow-Based-Cartograms/go_cart.svg)](http://hits.dwyl.io/Flow-Based-Cartograms/go_cart)
+[![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?url=https%3A%2F%2Fgithub.com%2FFlow-Based-Cartograms%2Fgo_cart&text=Create%20your%20own%20cartograms%20today%20-%20and%20see%20what%20your%20world%20really%20looks%20like%21&hashtags=data%2Cmap%2Ccartogram%2Ctech)
+
 We present a fast <a href="https://en.wikipedia.org/wiki/Cartogram" target="\_blank" title="What are Cartograms?">cartogram</a> generator written in C. It uses the flow-based algorithm devised by <a href="https://doi.org/10.1073/pnas.1712674115" target="\_blank">Gastner, Seguy & More</a>.
 
 This readme explains how to set up and use this software. In doing so, it uses data from the United States presidential election, 2016. This data is included in the repository.
