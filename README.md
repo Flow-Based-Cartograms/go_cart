@@ -2,21 +2,13 @@
 <p align="center">
 <img src ="sample_images/logo-trimmed.jpg" width="65%">
 <img src ="sample_images/detail.jpg" width="62%">
-</p>
-
-<hr>
 
 [![release](http://github-release-version.herokuapp.com/github/Flow-Based-Cartograms/go_cart/release.svg?style=flat)](https://github.com/Flow-Based-Cartograms/go_cart/releases/latest)
 [![Maintenance](https://img.shields.io/badge/maintained-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
 [![HitCount](http://hits.dwyl.io/Flow-Based-Cartograms/go_cart.svg)](http://hits.dwyl.io/Flow-Based-Cartograms/go_cart)
 [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?url=https%3A%2F%2Fgithub.com%2FFlow-Based-Cartograms%2Fgo_cart&text=Create%20your%20own%20cartograms%20today%20-%20and%20see%20what%20your%20world%20really%20looks%20like%21&hashtags=data%2Cmap%2Ccartogram%2Ctech)
 
-<hr>
-
-<p align="center">
 <img src ="sample_images/example_cartograms.jpg" width="80%">
-</p>
-
 
 <hr>
 
