@@ -1,12 +1,11 @@
 
 <p align="center">
 <img src ="sample_images/logo-trimmed.jpg" width="65%">
-<img src ="sample_images/detail.jpg" width="65%">
+<img src ="sample_images/detail.jpg" width="62%">
 </p>
 
 <hr>
 
-# Flow-Based Cartogram Generator
 We present a fast <a href="https://en.wikipedia.org/wiki/Cartogram" target="\_blank" title="What are Cartograms?">cartogram</a> generator written in C. It uses the flow-based algorithm devised by <a href="https://doi.org/10.1073/pnas.1712674115" target="\_blank">Gastner, Seguy & More</a>.
 
 This readme explains how to set up and use this software. In doing so, it uses data from the United States presidential election, 2016. This data is included in the repository.
