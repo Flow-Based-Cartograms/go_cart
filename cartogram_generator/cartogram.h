@@ -62,7 +62,7 @@ void fill_with_density1 (char *gen_file_name, char *area_file_name,
 void fill_with_density2 (void);
 void read_gen (char *gen_file);
 void ps_figure (char *ps_name, POINT **corn, POINT *proj, BOOLEAN grat);
-double interpol (double x, double y, double *grid, char *zero);
+double interpol (double x, double y, double *grid, char zero);
 void ffb_integrate (void);
 void diff_integrate (void);
 void project (BOOLEAN proj_graticule);
