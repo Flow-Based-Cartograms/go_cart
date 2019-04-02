@@ -246,8 +246,8 @@ void ffb_integrate (void)
       /* is inside the rectangle [0, lx] x [0, ly]. This fact guarantees     */
       /* that interpol() is given a point that cannot cause it to fail.      */
       
-      vx_intp[k] = interpol(proj[k].x, proj[k].y, gridvx, "x");
-      vy_intp[k] = interpol(proj[k].x, proj[k].y, gridvy, "y");
+      vx_intp[k] = interpol(proj[k].x, proj[k].y, gridvx, 'x');
+      vy_intp[k] = interpol(proj[k].x, proj[k].y, gridvy, 'y');
     }
     accept = FALSE;
     while (!accept) {
@@ -289,10 +289,10 @@ void ffb_integrate (void)
       	for (k=0; k<lx*ly; k++) {
       	  vx_intp_half[k] = interpol(proj[k].x + 0.5*delta_t*vx_intp[k],
 				     proj[k].y + 0.5*delta_t*vy_intp[k],
-				     gridvx, "x");
+				     gridvx, 'x');
       	  vy_intp_half[k] = interpol(proj[k].x + 0.5*delta_t*vx_intp[k],
 				     proj[k].y + 0.5*delta_t*vy_intp[k],
-				     gridvy, "y");
+				     gridvy, 'y');
       	  mid[k].x = proj[k].x + vx_intp_half[k] * delta_t;
       	  mid[k].y = proj[k].y + vy_intp_half[k] * delta_t;
 	  
