@@ -107,7 +107,7 @@ void ffb_calcv (double t)
 /* all the way to the edge (i.e. the slope is 0 consistent with a cosine     */
 /* transform).                                                               */
 
-double interpol (double x, double y, double *grid, char *zero)
+double interpol (double x, double y, double *grid, char zero)
 {
   double delta_x, delta_y, fx0y0, fx0y1, fx1y0, fx1y1, x0, x1, y0, y1;
   
@@ -116,7 +116,7 @@ double interpol (double x, double y, double *grid, char *zero)
     fprintf(stderr, "x=%f, y=%f\n", x, y);
     exit(1);
   }
-  if (strcmp(zero, "x")!=0 && strcmp(zero, "y")!=0) {
+  if (zero != 'x' && zero != 'y' ) {
     fprintf(stderr, "ERROR: unknown argument zero in interpol().\n");
     exit(1);
   }
@@ -132,40 +132,40 @@ double interpol (double x, double y, double *grid, char *zero)
   
   /* Function value at (x0, y0). */
   
-  if ((x<0.5 && y<0.5) || (x<0.5 && strcmp(zero, "x")==0) ||
-      (y<0.5 && strcmp(zero, "y")==0))
+  if ((x<0.5 && y<0.5) || (x<0.5 && zero == 'x') ||
+      (y<0.5 && zero == 'y'))
     fx0y0 = 0.0;
   else
     fx0y0 = grid[(int)x0*ly + (int)y0];
   
   /* Function value at (x0, y1). */
   
-  if ((x<0.5 && y>=ly-0.5) || (x<0.5 && strcmp(zero, "x")==0) ||
-      (y>=ly-0.5 && strcmp(zero, "y")==0))
+  if ((x<0.5 && y>=ly-0.5) || (x<0.5 && zero == 'x') ||
+      (y>=ly-0.5 && zero == 'y'))
     fx0y1 = 0.0;
-  else if (x>=0.5 && y>=ly-0.5 && strcmp(zero, "x")==0)
+  else if (x>=0.5 && y>=ly-0.5 && zero == 'x')
     fx0y1 = grid[(int)x0*ly + ly -1];
   else
     fx0y1 = grid[(int)x0*ly + (int)y1];
   
   /* Function value at (x1, y0). */
   
-  if ((x>=lx-0.5 && y<0.5) || (x>=lx-0.5 && strcmp(zero, "x")==0) ||
-      (y<0.5 && strcmp(zero, "y")==0))
+  if ((x>=lx-0.5 && y<0.5) || (x>=lx-0.5 && zero == 'x') ||
+      (y<0.5 && zero == 'y'))
     fx1y0 = 0.0;
-  else if (x>=lx-0.5 && y>=0.5 && strcmp(zero, "y")==0)
+  else if (x>=lx-0.5 && y>=0.5 && zero == 'y')
     fx1y0 = grid[(lx-1)*ly + (int)y0];
   else
     fx1y0 = grid[(int)x1*ly + (int)y0];
   
   /* Function value at (x1, y1). */
   
-  if ((x>=lx-0.5 && y>=ly-0.5) || (x>=lx-0.5 && strcmp(zero, "x")==0) ||
-      (y>=ly-0.5 && strcmp(zero, "y")==0))
+  if ((x>=lx-0.5 && y>=ly-0.5) || (x>=lx-0.5 && zero == 'x') ||
+      (y>=ly-0.5 && zero == 'y'))
     fx1y1 = 0.0;
-  else if (x>=lx-0.5 && y<ly-0.5 && strcmp(zero, "y")==0)
+  else if (x>=lx-0.5 && y<ly-0.5 && zero == 'y')
     fx1y1 = grid[(lx-1)*ly + (int)y1];
-  else if (x<lx-0.5 && y>=ly-0.5 && strcmp(zero, "x")==0)
+  else if (x<lx-0.5 && y>=ly-0.5 && zero == 'x')
     fx1y1 = grid[(int)x1*ly + ly - 1];
   else
     fx1y1 = grid[(int)x1*ly + (int)y1];
@@ -246,8 +246,8 @@ void ffb_integrate (void)
       /* is inside the rectangle [0, lx] x [0, ly]. This fact guarantees     */
       /* that interpol() is given a point that cannot cause it to fail.      */
       
-      vx_intp[k] = interpol(proj[k].x, proj[k].y, gridvx, "x");
-      vy_intp[k] = interpol(proj[k].x, proj[k].y, gridvy, "y");
+      vx_intp[k] = interpol(proj[k].x, proj[k].y, gridvx, 'x');
+      vy_intp[k] = interpol(proj[k].x, proj[k].y, gridvy, 'y');
     }
     accept = FALSE;
     while (!accept) {
@@ -289,10 +289,10 @@ void ffb_integrate (void)
       	for (k=0; k<lx*ly; k++) {
       	  vx_intp_half[k] = interpol(proj[k].x + 0.5*delta_t*vx_intp[k],
 				     proj[k].y + 0.5*delta_t*vy_intp[k],
-				     gridvx, "x");
+				     gridvx, 'x');
       	  vy_intp_half[k] = interpol(proj[k].x + 0.5*delta_t*vx_intp[k],
 				     proj[k].y + 0.5*delta_t*vy_intp[k],
-				     gridvy, "y");
+				     gridvy, 'y');
       	  mid[k].x = proj[k].x + vx_intp_half[k] * delta_t;
       	  mid[k].y = proj[k].y + vy_intp_half[k] * delta_t;
 	  
