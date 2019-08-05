@@ -1,27 +1,11 @@
 # Checking for Operating System
 if [ "$(uname)" == "Darwin" ]; then
     # Install dependencies and Generate Makefile on Mac
-    chmod a+x scripts/prepare_env_mac.sh && scripts/prepare_env_mac.sh
+    bash scripts/build_mac.sh
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     # Install dependencies and Generate Makefile on Linux
-    chmod a+x scripts/prepare_env_linux.sh && scripts/prepare_env_linux.sh
-#elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
-    # Do something under 32 bits Windows NT platform
-#elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]; then
-    # Do something under 64 bits Windows NT platform
+    bash scripts/build_linux.sh
+else
+    echo "Warning: Your environment is currently not supported by autobuild."
+    ./configure && make
 fi
-
-# Going into source code directory
-cd cartogram_generator
-
-# Building cartogram generator and placing in root directory
-make clean &>/dev/null
-echo "Cleaned up directory."
-make && \
-cp cartogram ../ && \
-echo "Successfully built cartogram generator." && \
-echo "Run using: ./cartogram [.gen file] [.dat file]." || \
-echo "An error occured. Please refer to the relevant troubleshooting instructions."
-
-# Moving back to root directory
-cd ..

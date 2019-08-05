@@ -98,7 +98,7 @@ void ffb_calcv (double t)
 /* Function to bilinearly interpolate a numerical array grid[0..lx*ly-1]     */
 /* whose entries are numbers for the positions:                              */
 /* x = (0.5, 1.5, ..., lx-0.5), y = (0.5, 1.5, ..., ly-0.5).                 */
-/* The final argument "zero" can take two possible values: "x" or "y". If    */
+/* The final argument "zero" can take two possible values: 'x' or 'y'. If    */
 /* zero==x, the interpolated function is forced to return 0 if x=0 or x=lx.  */
 /* This option is suitable fo interpolating from gridvx because there can be */
 /* no flow through the boundary. If zero==y, the interpolation returns 0 if  */
@@ -316,7 +316,7 @@ void ffb_integrate (void)
     /* Control output. */
     
     if (iter % 10 == 0)
-      printf("iter = %d, t = %e, delta_t = %e\n", iter, t, delta_t);
+      fprintf(stderr, "iter = %d, t = %e, delta_t = %e\n", iter, t, delta_t);
     
     /* When we get here, the integration step was accepted. */
     
