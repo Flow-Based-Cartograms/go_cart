@@ -186,9 +186,10 @@ In case you run into problems while building the generator using the automated s
 #### macOS
 1. Install fftw and gcc.
 ```
-$ brew install fftw
-$ brew install gcc
+brew install fftw && brew link fftw
+brew install gcc
 ```
+
 2. Note down the version of `gcc` installed. For example, if `gcc-8.1.0` is installed, your version would be `8` (not 8.1.0).
 
 3. Run configure and pass it the compiler information
