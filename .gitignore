@@ -8,6 +8,15 @@ cartogram_generator/cartogram
 ###################
 cartogram.gen
 area_error.dat
+cartogram_generator/.deps/
+configure
+Makefile.in
+Makefile
+config/
+m4/
+autom4te.cache/
+config.status
+config.log
 *.eps
 *.pdf
 
