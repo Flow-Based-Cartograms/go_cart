@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # Checking for Operating System
 if [ "$(uname)" = "Darwin" ]; then
     # Install dependencies and Generate Makefile on Mac
