@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # This echoes the commands to STDOUT, so the user can see what's going on.
 set -x
 brew install cjson fftw pkg-config autoconf automake && \

@@ -1,3 +1,4 @@
+#!/bin/sh
 
 # This echoes the commands to STDOUT, so the user can see what's going on.
 set -x

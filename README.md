@@ -14,6 +14,7 @@
 - [Input data format](#input-data-format)
 - [Building the cartogram generator](#building-the-cartogram-generator)
 - [Running the cartogram generator](#running-the-cartogram-generator)
+  * [Processing Your Map](#processing-your-map-geojson)
   * [Examples](#examples)
   * [Options](#options)
 - [Troubleshooting](#troubleshooting)
@@ -53,7 +54,7 @@ Gastner, M., Seguy, V., & More, P. (2018). Fast flow-based algorithm for creatin
 ```
 
 ## Input data format
-The cartogram generator expects two input file.
+The cartogram generator expects two input files.
 
 1. a '.json' file containing the cartesian coordinates for the map regions under consideration. For example, for the 2016 US presidential election data we provide `usa_contiguous_arcgis.json` (in the `sample_data` folder) which includes the coordinates for the boundaries of the different states of the contiguous United States. You will need to obtain the '.json' file and it needs to adhere to the GeoJSON specifications. It also needs to be processed first by using the command `cartogram -p [json_file_name]` (Instructions found [below](#running-the-cartogram-generator)).  If you do not have a '.json' file, please follow the steps listed here: https://github.com/Flow-Based-Cartograms/go_cart/blob/master/process_map_file.md
 
@@ -92,7 +93,7 @@ No additional dependencies. Your default `apt-get` package manager should work f
 sudo ./autobuild.sh
 ```
 
-3. The `cartogram` executable can be found under `cartogram_generator/`. To install it, run the following command:
+3. The `cartogram` executable can be found in the root directory of the repository. To add the generator to your list of binaries, and access it outside this directory, please run the following command:
 ```
 sudo make install
 ```
@@ -114,17 +115,41 @@ Generate Cartogram:   cartogram [-dei] -g map_file_name -a area_file_name
 
 ## Running the cartogram generator
 
-First, you need to process the '.json' file.
+To generate a cartogram, you need a map and the associated statistical data you want to visualize. The cartogram generator accepts maps in GeoJSON and ArcInfo Generate formats, and statistical data in CSV format. To generate a cartogram, you need to:
 
-Process the '.json' file using the following command:
+1. Process the original map (you only need to do this once)
+2. Generate a CSV file with the data you want to visualize
+3. Run the cartogram generator
+
+### Processing Your Map (GeoJSON)
+
+Process your GeoJSON map file using the following command:
 ```
 cartogram -p json_file_name
 ```
 
-The cartogram will generate 2 new files: a processedmap '.json' file and '.csv' file. Fill in the data in the '.csv' file. Then, run the following command to generate the cartogram.
+The cartogram will generate 2 new files: a processedmap '.json' file and '.csv' file. Open the CSV file with your preferred spreadsheet program, and fill in the data value for each region under the 'Region Data' column.
+
+### Processing Your Map (ArcInfo Generate)
+
+Please note that support for the ArcInfo Generate format is provided for backwards compatability with existing maps. New maps should use the GeoJSON format. While you do not need to run a command to process the map file, you need to genenate the CSV file containing the statistical data you want to visualize manually. It should contain two columns:
+
+1. `Region Id`, which corresponds to the region IDs in the map file
+2. `Region Data`, which contains the data for each region
+
+### Generating a Cartogram
+
+Once you have processed your map file and generated a CSV file with the data you want to visualize, you can run the following command to generate a cartogram:
+
 ```
-cartogram [-edi] -g processedmap_file_name -a csv_file_name
+cartogram -g processedmap_file_name -a csv_file_name
 ```
+
+The generated cartogram will be saved in the same format as the map input in the current working directory with the filename:
+
+- `cartogram.json`, if the input map is in GeoJSON format
+- `cartogram.gen`, if the input map is in ArcInfo Generate format
+
 ### Examples
 
 For the 2016 US presidential election data, navigate to the `sample_data/` directory, and run the following command. Note that the sample data has **already been processed** using `cartogram -p`
@@ -132,16 +157,21 @@ For the 2016 US presidential election data, navigate to the `sample_data/` direc
 cartogram -g usa_contiguous_arcgis.json -a usa_contiguous_electors.csv
 ```
 
-If you supply the **-e** option, you should see two generated files:
+To generate an EPS image of the original map and cartogram, use the `-e` option:
+```
+cartogram -eg usa_contiguous_arcgis.json -a usa_contiguous_electors.csv
+```
+Running this command will produce three files:
 
-- `map.eps` shows the original map
-- `cartogram.eps` shows the generated cartogram.
+- `cartogram.json` contains the cartogram in GeoJSON format
+- `map.eps` contains the original map in EPS format
+- `cartogram.eps` contains the generated cartogram in EPS format
 
-On macOS, open using
+On macOS, you can view EPS files with the command:
 ```
 open <filename>.eps
 ```
-On Linux, open using
+On Linux, run the following instead:
 ```
 evince <filename>.eps
 ```
@@ -171,10 +201,10 @@ For our example, `map.eps` should look as follows:
 > Print inverse transform to file
 
 **-g**<br/>
-> Location of the .gen/.json/.geojson file for the original map
+> Location of file for the original map
 
 **-a**<br/>
-> Location of the area information file (.csv/.dat). Cannot be used with **-s**.
+> Location of the area information file. Cannot be used with **-s**.
 
 **-s**<br/>
 > Read the area information from `stdin`, and output the cartogram gen file to `stdout`. Cannot be used with **-a**.

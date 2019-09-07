@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # Script to download, build, and install cJSON library.
 # This is only necessary on Linux, because there is a Homebrew package
 
