@@ -223,8 +223,9 @@ brew install gcc
 
 2. Note down the version of `gcc` installed. For example, if `gcc-8.1.0` is installed, your version would be `8` (not 8.1.0).
 
-3. Run configure and pass it the compiler information
+3. Run autogen and configure,  pass it the compiler information
 ```
+$ ./autogen.sh
 $ CC=gcc-[your-version-number] ./configure
 ```
 
@@ -243,7 +244,7 @@ sudo apt-get install build-essential
 
 2. Make sure you are in the root directory, and then run the remaining steps.
 ```
-$ ./configure && make
+$ ./autogen.sh && ./configure && make
 ```
 
 #### Error (macOS): Don't understand 'm' flag!
