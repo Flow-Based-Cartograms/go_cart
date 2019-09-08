@@ -90,7 +90,7 @@ No additional dependencies. Your default `apt-get` package manager should work f
 
 2. Run the provided automatic build script. This will install the required dependencies and run configure and make for you:
 ```
-sudo ./autobuild.sh
+./autobuild.sh
 ```
 
 3. The `cartogram` executable can be found in the root directory of the repository. To add the generator to your list of binaries, and access it outside this directory, please run the following command:
@@ -222,8 +222,9 @@ brew install gcc
 
 2. Note down the version of `gcc` installed. For example, if `gcc-8.1.0` is installed, your version would be `8` (not 8.1.0).
 
-3. Run configure and pass it the compiler information
+3. Run autogen and configure,  pass it the compiler information
 ```
+$ ./autogen.sh
 $ CC=gcc-[your-version-number] ./configure
 ```
 
@@ -242,7 +243,7 @@ sudo apt-get install build-essential
 
 2. Make sure you are in the root directory, and then run the remaining steps.
 ```
-$ ./configure && make
+$ ./autogen.sh && ./configure && make
 ```
 
 #### Error (macOS): Don't understand 'm' flag!
