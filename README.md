@@ -90,7 +90,6 @@ No additional dependencies. Your default `apt-get` package manager should work f
 
 2. Run the provided automatic build script. This will install the required dependencies and run configure and make for you:
 ```
-chmod +x autobuild.sh
 ./autobuild.sh
 ```
 
