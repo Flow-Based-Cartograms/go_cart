@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
+#include <cjson/cJSON.h>
 #include "cartogram.h"
 
 /**************************** Function prototypes. ***************************/
@@ -69,24 +71,25 @@ void project (BOOLEAN proj_graticule)
 /* The function also updates the arrays cart_area[] and area_err[] that are  */
 /* passed by reference.                                                      */
 
-double max_area_err (double *area_err, double *cart_area)
+double max_area_err (double *area_err, double *cart_area, POINT **corn,
+		     double *sum_cart_area)
 {
-  double max, obj_area, sum_cart_area, sum_target_area;
+  double max, obj_area, sum_target_area;
   int i, j;
   
   for (i=0; i<n_reg; i++) {
     cart_area[i] = 0.0;
     for (j=0; j<n_polyinreg[i]; j++)
       cart_area[i] += polygon_area(n_polycorn[polyinreg[i][j]],
-				   cartcorn[polyinreg[i][j]]);
+				   corn[polyinreg[i][j]]);
   }
   for (i=0, sum_target_area=0.0; i<n_reg; i++)
     sum_target_area += target_area[i];
-  for (i=0, sum_cart_area=0.0; i<n_reg; i++)
-    sum_cart_area += cart_area[i];
+  for (i=0, *sum_cart_area=0.0; i<n_reg; i++)
+    *sum_cart_area += cart_area[i];  
   for (i=0; i<n_reg; i++) {
     obj_area =                         /* Objective area in cartogram units. */
-      target_area[i] * sum_cart_area / sum_target_area;
+      target_area[i] * (*sum_cart_area) / sum_target_area;
     area_err[i] = cart_area[i] / obj_area - 1.0;
   }
   max = 0.0;                   /* Determine the maximum absolute area error. */
@@ -99,32 +102,199 @@ double max_area_err (double *area_err, double *cart_area)
 /*****************************************************************************/
 /** Function to write cartogram polygons and relative area errors to files. **/
 
-void output_to_ascii (void)
+void output_to_gen (BOOLEAN usestd, POINT **corn)
 {
-  FILE *err_file = fopen("area_error.dat", "w"),
-    *gen_file = fopen("cartogram.gen", "w");
+  FILE *gen_file = stdout;
   int i, j;
 
   /***************** Output of coordinates to cartogram.gen. *****************/
 
+  if (!usestd)
+    gen_file = fopen("cartogram.gen", "w");
   for (i=0; i<n_poly; i++) {
     fprintf(gen_file, "%d\n", polygon_id[i]);
     for (j=0; j<n_polycorn[i]; j++)
-      fprintf(gen_file, "%f %f\n", cartcorn[i][j].x, cartcorn[i][j].y);
+      fprintf(gen_file, "%f %f\n", corn[i][j].x, corn[i][j].y);
     fprintf(gen_file, "END\n");
   }
-  fprintf(gen_file, "END\n");
-  fclose(gen_file);
+  fprintf(gen_file, "END\n");  
+  fflush(gen_file);
+  if (!usestd)
+    fclose(gen_file);
+}
+
+void output_to_geojson (BOOLEAN usestd, POINT **corn, char *map_file_name)
+{
+  FILE *json_file = stdout;
+  FILE *map_file;
+  char *strJson = NULL;
+  int line_len;
+  int MAX_STRING_LENGTH_JSON = 1000000; /* Large in order to read files more quickly */
+  char* str = (char *) malloc(MAX_STRING_LENGTH_JSON);
+  int strJson_size = 0;
+
+  if ((map_file = fopen(map_file_name,"r")) == NULL) {
+    fprintf(stderr,"ERROR: Cannot find map file.\n");
+    exit(1);
+  }
+  while (fgets(str, MAX_STRING_LENGTH_JSON, map_file) != NULL){
+    line_len = strlen(str);
+    if(line_len > 0 && str[line_len - 1] == '\n'){
+      str[line_len - 1] = '\0';
+    }
+
+    if(strJson == NULL){
+      strJson_size = line_len + 1;
+      strJson = (char *) calloc(line_len + 1, sizeof(char));
+      strncpy(strJson, str, strJson_size - strlen(strJson) - 1);
+    }else{
+      strJson_size = (strlen(strJson)) + line_len + 1;
+      strJson = (char *) realloc(strJson, (strlen(strJson)) + line_len + 1);
+      strncat(strJson, str, strJson_size - strlen(strJson) - 1);
+    }
+  }
+  free(str);
+  cJSON *root = cJSON_Parse(strJson);
+  free(strJson);
+  fclose(map_file);
+  /***************** Output of coordinates to cartogram.json. *****************/
+  
+  if (!usestd){
+    json_file = fopen("cartogram.json", "w");
+  }
+  cJSON *feature_collection = cJSON_CreateObject();
+  cJSON_AddStringToObject(feature_collection, "type", "FeatureCollection");
+  cJSON *bbox = cJSON_AddArrayToObject(feature_collection, "bbox");
+  cJSON *features = cJSON_AddArrayToObject(feature_collection, "features");
+  double cart_minx = corn[0][0].x, cart_miny = corn[0][0].y, cart_maxx = corn[0][0].x, cart_maxy = corn[0][0].y;
+  for (int k=0; k<n_reg; k++){
+    cJSON *feature = cJSON_CreateObject();
+    cJSON_AddItemToArray(features, feature);
+    cJSON_AddStringToObject(feature, "type", "Feature");
+    cJSON *properties = cJSON_CreateObject();
+    cJSON_AddItemToObject(feature, "properties", properties);
+    int length = snprintf(NULL, 0, "%d", region_id[k]);
+    char* region_id_str = malloc(length + 1);
+    snprintf(region_id_str, length + 1, "%d", region_id[k]);
+    cJSON_AddStringToObject(properties, "cartogram_id", region_id_str);
+    cJSON *orig_features = cJSON_GetObjectItemCaseSensitive(root, "features");
+    cJSON *orig_feature_iterator = NULL;
+    cJSON_ArrayForEach(orig_feature_iterator, orig_features){
+      cJSON * orig_feature_properties = cJSON_GetObjectItemCaseSensitive(orig_feature_iterator, "properties");
+      char * orig_feature_id = cJSON_GetObjectItemCaseSensitive(orig_feature_properties, "cartogram_id")->valuestring;
+      if(strcmp(orig_feature_id, region_id_str) == 0){
+        cJSON *orig_property_iterator = NULL;
+        cJSON_ArrayForEach(orig_property_iterator, orig_feature_properties){
+          if(strcmp(orig_property_iterator->string, "cartogram_id") != 0){
+            cJSON_AddItemReferenceToObject(properties, orig_property_iterator->string, orig_property_iterator);
+          }
+        }
+      }
+    }
+    free(region_id_str);
+    if(region_na[k] == 1){
+      cJSON_AddStringToObject(properties, "cartogram_data", "null (missing data)");
+    }
+    cJSON *geometry = cJSON_CreateObject();
+    cJSON_AddItemToObject(feature, "geometry", geometry);
+    int n_holes = 0;
+    for(int l=0; l < n_polyinreg[k];l++){
+      if(poly_is_hole[polyinreg[k][l]]) {
+        n_holes++;
+      }
+    }
+    if((n_polyinreg[k] - n_holes) > 1){
+      cJSON_AddStringToObject(geometry, "type", "MultiPolygon");
+      cJSON *multipolygon_array_of_polygons = cJSON_AddArrayToObject(geometry, "coordinates");
+      cJSON *polygon_array_of_linear_rings = NULL;
+      for(int l=0; l < n_polyinreg[k];l++){
+        int polypos = polyinreg[k][l];
+
+        if(!poly_is_hole[polypos]){
+          polygon_array_of_linear_rings = cJSON_CreateArray();
+          cJSON_AddItemToArray(multipolygon_array_of_polygons, polygon_array_of_linear_rings);
+          cJSON *linear_ring_array_of_positions = cJSON_CreateArray();
+          cJSON_AddItemToArray(polygon_array_of_linear_rings, linear_ring_array_of_positions);
+          for(int m = (n_polycorn[polypos] - 1); m >= 0; m--){
+            cJSON *array_of_positions = cJSON_CreateArray();
+            cJSON_InsertItemInArray(linear_ring_array_of_positions, 0, array_of_positions); /* Use InsertItemInArray here for speed and efficiency. AddItemToArray loops through every single item in the array */
+            cJSON_InsertItemInArray(array_of_positions, 0, cJSON_CreateNumber(corn[polypos][m].y));
+            cJSON_InsertItemInArray(array_of_positions, 0, cJSON_CreateNumber(corn[polypos][m].x));
+            cart_minx = MIN(cart_minx, corn[polypos][m].x);
+            cart_maxx = MAX(cart_maxx, corn[polypos][m].x);
+            cart_miny = MIN(cart_miny, corn[polypos][m].y);
+            cart_maxy = MAX(cart_maxy, corn[polypos][m].y);
+          }
+        }else{
+          cJSON *linear_ring_array_of_positions = cJSON_CreateArray();
+          cJSON_AddItemToArray(polygon_array_of_linear_rings, linear_ring_array_of_positions);
+          for(int m = (n_polycorn[polypos] - 1); m >= 0; m--){
+            cJSON *array_of_positions = cJSON_CreateArray();
+            cJSON_InsertItemInArray(linear_ring_array_of_positions, 0, array_of_positions);
+            cJSON_InsertItemInArray(array_of_positions, 0, cJSON_CreateNumber(corn[polypos][m].y));
+            cJSON_InsertItemInArray(array_of_positions, 0, cJSON_CreateNumber(corn[polypos][m].x));
+            cart_minx = MIN(cart_minx, corn[polypos][m].x);
+            cart_maxx = MAX(cart_maxx, corn[polypos][m].x);
+            cart_miny = MIN(cart_miny, corn[polypos][m].y);
+            cart_maxy = MAX(cart_maxy, corn[polypos][m].y);
+          }
+        }
+      }
+    }else if((n_polyinreg[k] - n_holes) == 1){
+      cJSON_AddStringToObject(geometry, "type", "Polygon");
+      cJSON *polygon_array_of_linear_rings = cJSON_AddArrayToObject(geometry, "coordinates");
+      for(int l=0; l < n_polyinreg[k];l++){
+        int polypos = polyinreg[k][l];
+        cJSON *linear_ring_array_of_positions = cJSON_CreateArray();
+        cJSON_AddItemToArray(polygon_array_of_linear_rings, linear_ring_array_of_positions);
+        for(int m = (n_polycorn[polypos] - 1); m >= 0; m--){
+          cJSON *array_of_positions = cJSON_CreateArray();
+          cJSON_InsertItemInArray(linear_ring_array_of_positions, 0, array_of_positions);
+          cJSON_InsertItemInArray(array_of_positions, 0, cJSON_CreateNumber(corn[polypos][m].y));
+          cJSON_InsertItemInArray(array_of_positions, 0, cJSON_CreateNumber(corn[polypos][m].x));
+          cart_minx = MIN(cart_minx, corn[polypos][m].x);
+          cart_maxx = MAX(cart_maxx, corn[polypos][m].x);
+          cart_miny = MIN(cart_miny, corn[polypos][m].y);
+          cart_maxy = MAX(cart_maxy, corn[polypos][m].y);
+        }
+      }
+    }else{
+      fprintf(stderr, "Error with polygons while writing GeoJSON file. n_polyinreg[%d] = %d while n_holes = %d\n", k, n_polyinreg[k], n_holes);
+    }
+  }
+  cJSON_AddItemToArray(bbox, cJSON_CreateNumber(cart_minx));
+  cJSON_AddItemToArray(bbox, cJSON_CreateNumber(cart_miny));
+  cJSON_AddItemToArray(bbox, cJSON_CreateNumber(cart_maxx));
+  cJSON_AddItemToArray(bbox, cJSON_CreateNumber(cart_maxy));
+
+  char *json_output = cJSON_Print(feature_collection);
+
+  cJSON_Delete(feature_collection);
+  cJSON_Delete(root);
+
+  fprintf(json_file, "%s", json_output);
+  fflush(json_file);
+  if (!usestd){
+    fclose(json_file);
+  }
+
+  free(json_output);
+}
 
   /*************** Output of relative area errors to err_file. ***************/
+void output_error (void)
+{
+  FILE *err_file = fopen("area_error.dat", "w");
+  int i;
+
   for (i=0; i<n_reg; i++) {
     fprintf(err_file, "region %d: ", region_id[i]);
     fprintf(err_file,
-    	    "cartogram area = %f, relative error = %f\n",
-	    cart_area[i], area_err[i]);
+          "cartogram area = %f, relative error = %f\n",
+      cart_area[i], area_err[i]);
   }
   fclose(err_file);
-  
+
   return;
 }
 
@@ -267,29 +437,29 @@ POINT affine_transf(int triid, POINT *tri, double x, double y)
   pre.x = (t11*x + t12*y + t13) / det;
   pre.y = (t21*x + t22*y + t23) / det;
   
-  return(pre);
+  return pre;
 }
 
 /*************** Helper function: return min/max of 4 numbers. ***************/
 double min4 (double a, double b, double c, double d)
 {
   if (a <= b && a <= c && a <= d)
-    return(a);
+    return a;
   if (b <= a && b <= c && b <= d)
-    return(b);
+    return b;
   if (c <= a && c <= b && c <= d)
-    return(c);
-  return(d);
+    return c;
+  return d;
 }
 double max4 (double a, double b, double c, double d)
 {
   if (a >= b && a >= c && a >= d)
-    return(a);
+    return a;
   if (b >= a && b >= c && b >= d)
-    return(b);
+    return b ;
   if (c >= a && c >= b && c >= d)
-    return(c);
-  return(d);
+    return c;
+  return d;
 }
 
 /********** Function to calculate the inverse projection invproj[]. **********/

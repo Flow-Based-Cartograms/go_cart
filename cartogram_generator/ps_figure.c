@@ -5,6 +5,7 @@
 #include "cartogram.h"
 
 /******************************** Definitions. *******************************/
+
 /* Number of graticule lines to be plotted along the longer dimension. */
 #define GRAT_LINES (64)
 
@@ -45,7 +46,11 @@ void ps_figure (char *ps_name, POINT **corn, POINT *prj, BOOLEAN grat)
 		corn[polyinreg[i][j]][k].x, corn[polyinreg[i][j]][k].y);
       fprintf(ps_file, "c\n");
     }
-    fprintf(ps_file, "gsave\n0.5 SGRY f\ngrestore\n0 SGRY s\n");
+    if(region_na[i] == 0){
+      fprintf(ps_file, "gsave\n0.96 0.92 0.70 SRGB f\ngrestore\n0 SGRY s\n");
+    }else{
+      fprintf(ps_file, "gsave\n0.75 SGRY f\ngrestore\n0 SGRY s\n");
+    }
   }
 
   /********************* If grat = TRUE, plot graticule. *********************/

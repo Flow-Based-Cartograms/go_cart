@@ -15,9 +15,9 @@ int **xyhalfshift2reg;
 
 void rescale_map (BOOLEAN inv);
 void set_inside_value_at_y (int region, POINT pk, POINT pn, int l,
-			    double poly_minx, int **inside);
+          double poly_minx, int **inside);
 void set_inside_values_between_points (int region, POINT pk, POINT pn,
-				       double poly_minx, int **inside);
+               double poly_minx, int **inside);
 void interior (void);
 void gaussian_blur (double tot_init_area, double avg_dens);
 
@@ -51,9 +51,10 @@ void rescale_map (BOOLEAN inv)
     new_maxx = 0.5*(map_maxx+map_minx) + 0.5*lx*latt_const;
     new_minx = 0.5*(map_maxx+map_minx) - 0.5*lx*latt_const;
   }
-  printf("Using a %d x %d lattice with bounding box\n\t(%f %f %f %f).\n",
-	 lx, ly, new_minx, new_miny, new_maxx, new_maxy);
-
+  fprintf(stderr,
+    "Using a %d x %d lattice with bounding box\n\t(%f %f %f %f).\n",
+    lx, ly, new_minx, new_miny, new_maxx, new_maxy);
+  
   /********************* Rescale all polygon coordinates. ********************/
 
   for (i=0; i<n_poly; i++)
@@ -70,8 +71,8 @@ void rescale_map (BOOLEAN inv)
       origcorn[i] = (POINT*) malloc(n_polycorn[i] * sizeof(POINT));
     for (i=0; i<n_poly; i++)
       for (j=0; j<n_polycorn[i]; j++) {
-	origcorn[i][j].x = polycorn[i][j].x;
-	origcorn[i][j].y = polycorn[i][j].y;
+  origcorn[i][j].x = polycorn[i][j].x;
+  origcorn[i][j].y = polycorn[i][j].y;
       }
   }
   
@@ -86,7 +87,7 @@ void rescale_map (BOOLEAN inv)
 /* current y-value l.                                                        */
 
 void set_inside_value_at_y (int region, POINT pk, POINT pn, int l,
-			    double poly_minx, int **inside)
+          double poly_minx, int **inside)
 {
   double intersection;
   int m;
@@ -110,7 +111,7 @@ void set_inside_value_at_y (int region, POINT pk, POINT pn, int l,
 /* connecting the input coordinates.                                         */
 
 void set_inside_values_between_points (int region, POINT pk, POINT pn,
-				       double poly_minx, int **inside)
+               double poly_minx, int **inside)
 {
   int l;
   
@@ -127,7 +128,7 @@ void set_inside_values_between_points (int region, POINT pk, POINT pn,
 /**** region.                                                             ****/
 
 void set_inside_values_for_polygon (int region, int n_polycorn,
-				    POINT *polycorn, int **inside)
+            POINT *polycorn, int **inside)
 {
   double poly_minx = polycorn[0].x;
   int k, n;
@@ -141,7 +142,7 @@ void set_inside_values_for_polygon (int region, int n_polycorn,
 
   for (k=0, n=n_polycorn-1; k<n_polycorn; n=k++)
     set_inside_values_between_points(region, polycorn[k], polycorn[n],
-				     poly_minx, inside);
+             poly_minx, inside);
   return;
 }
 
@@ -169,45 +170,9 @@ void interior (void)
     for (j=0; j<n_polyinreg[i]; j++) {
       poly = polyinreg[i][j];
       set_inside_values_for_polygon(i, n_polycorn[poly], polycorn[poly],
-				    xyhalfshift2reg);
+            xyhalfshift2reg);
     }
   return;
-}
-
-/*****************************************************************************/
-/* Function to determine polygon area. This is needed to determine the       */
-/* average population.                                                       */
-/* The problem in short is to find the area of a polygon whose vertices are  */
-/* given. Recall Stokes' theorem in 3d for a vector field v:                 */
-/* integral[around closed curve dA]v(x,y,z).ds =                             */
-/*                                          integral[over area A]curl(v).dA. */
-/* Now let v(x,y,z) = (0,Q(x,y),0) and dA = (0,0,dx*dy). Then                */
-/* integral[around closed curve dA]Q(x,y)dy =                                */
-/*                                         integral[over area A]dQ/dx*dx*dy. */
-/* If Q = x:                                                                 */
-/* A = integral[over area A]dx*dy = integral[around closed curve dA]x dy.    */
-/* For every edge from (x[i],y[i]) to (x[i+1],y[i+1]) there is a             */
-/* parametrization                                                           */
-/* (x(t),y(t)) = ((1-t)x[i]+t*x[i+1],(1-t)y[i]+t*y[i+1]), 0<t<1              */
-/* so that the path integral along this edge is                              */
-/* int[from 0 to 1]{(1-t)x[i]+t*x[i+1]}(y[i+1]-y[i])dt =                     */
-/*                                          0.5*(y[i+1]-y[i])*(x[i]+x[i+1]). */
-/* Summing over all edges yields:                                            */
-/* Area = 0.5*[(x[0]+x[1])(y[1]-y[0]) + (x[1]+x[2])(y[2]-y[1]) + ...         */
-/*               ... + (x[n-1]+x[n])(y[n]-y[n-1]) + (x[n]+x[0])(y[0]-y[n])]. */
-/* ArcGIS treats a clockwise direction as positive, so that there is an      */
-/* additional minus sign.                                                    */
-
-double polygon_area (int ncrns, POINT *polygon)
-{
-  double area = 0.0;
-  int i;
-
-  for (i=0; i<ncrns-1; i++)
-    area -=
-      0.5 * (polygon[i].x+polygon[i+1].x) * (polygon[i+1].y-polygon[i].y);
-  return area -= 0.5 * (polygon[ncrns-1].x+polygon[0].x) *
-          (polygon[0].y-polygon[ncrns-1].y);
 }
 
 /*****************************************************************************/
@@ -222,7 +187,7 @@ void gaussian_blur (double tot_init_area, double avg_dens)
   /* Prepare the backward transform (i.e. from Fourier to real space). */
 
   plan_bwd = fftw_plan_r2r_2d(lx, ly, rho_ft, rho_init,
-  			  FFTW_REDFT01, FFTW_REDFT01, FFTW_ESTIMATE);
+          FFTW_REDFT01, FFTW_REDFT01, FFTW_ESTIMATE);
 
   /* Upon forward and backward transform, rho_init is multiplied by the      */
   /* factor 4*lx*ly.                                                         */
@@ -243,7 +208,7 @@ void gaussian_blur (double tot_init_area, double avg_dens)
     for (j=0; j<ly; j++) {
       scale_j = (double) j /ly;
       rho_ft[i*ly+j] *=
-	exp(prefactor * (scale_i*scale_i + scale_j*scale_j));
+  exp(prefactor * (scale_i*scale_i + scale_j*scale_j));
     }
   }
   fftw_execute(plan_bwd);      /* Transform back from Fourier to real space. */
@@ -261,33 +226,62 @@ void gaussian_blur (double tot_init_area, double avg_dens)
 /* It also performs a Gaussian blur on the input density. This function      */
 /* should only be called once, namely before the first round of integration. */
 /* Afterwards use fill_with_density2() below.                                */
+/* Input: - map_file_name: name of the .gen-file/.json-file containing the polygon      */
+/*                         coordinates                                       */
+/*        - area_file_name: name of the .dat-file containing the target      */
+/*                          areas                                            */
+/*        - inv: do we need the inverse transform? If yes, we must store the */
+/*               original polygon coordinates.                               */
+/* Return value: is there only one region? If yes, we neither need to        */
+/*               rasterize the map nor read the target areas because the     */
+/*               output cartogram is simply a linear transformation of the   */
+/*               input map.                                                  */
 
-void fill_with_density1 (char *gen_file_name, char *area_file_name,
-			 BOOLEAN inv)
+BOOLEAN fill_with_density1 (char *map_file_name, char *area_file_name,
+          BOOLEAN inv, BOOLEAN eps)
 {
   char line[MAX_STRING_LENGTH];
-  double area, avg_dens, *dens, *init_area, min_area, tot_init_area,
+  double area, avg_dens, *dens, *init_area, tot_init_area,
           tot_target_area;
   FILE *area_file;
   int i, id, j;
 
   /************************** Read the coordinates. **************************/
 
-  read_gen(gen_file_name);
+  read_map(map_file_name);
+
+  /*************** Allocate memory for the area and area error. **************/
+  
+  cart_area = (double*) malloc(n_reg * sizeof(double));
+  area_err = (double*) malloc(n_reg * sizeof(double));
+  target_area = (double*) malloc(n_reg * sizeof(double));
 
   /***************** Fit the map on an (lx)*(ly)-square grid. ****************/
 
   rescale_map(inv);
 
+  /* Print a map of the input coordinates in eps-format. The last argument   */
+  /* is FALSE because we do not need to show the graticule.                  */
+  
+  if (eps)
+    ps_figure("map.eps", polycorn, proj, FALSE);
+  if (n_reg == 1) {
+
+    /* Placeholder for target area so that max_area_error() produces a       */
+    /* finite numeric result.                                                */
+
+    target_area[0] = 1.0;
+    return TRUE;  /* It is true that there is only one region. */
+  }
+  
   /***************************** Allocate memory. ****************************/
 
   xyhalfshift2reg = (int**) malloc(lx * sizeof(int*));
   for (i=0; i<lx; i++)
     xyhalfshift2reg[i] = (int*) malloc(ly * sizeof(int));
   dens = (double*) malloc(n_reg * sizeof(double));
-  target_area = (double*) malloc(n_reg * sizeof(double));
   init_area = (double*) calloc(n_reg, sizeof(double));
-
+  
   /******* Determine inside which regions the grid points are located. *******/
 
   interior();
@@ -295,54 +289,176 @@ void fill_with_density1 (char *gen_file_name, char *area_file_name,
   /*********************** Read target areas from file. **********************/
 
   for (i=0; i<n_reg; i++) target_area[i] = -1.0;
-  if ((area_file = fopen(area_file_name, "r")) == NULL) {
+  if (area_file_name == NULL){
+    area_file = stdin;
+  }else if ((area_file = fopen(area_file_name, "r")) == NULL) {
     fprintf(stderr, "ERROR: Cannot open area-file.\n");
     exit(1);
   }
   while (fgets(line, MAX_STRING_LENGTH, area_file) != NULL) {
-    sscanf(line, "%d %lf", &id, &area);
-    if (id>max_id || region_id_inv[id]<0) {
-      fprintf(stderr, "ERROR: Identifier %d in area-file does not match\n",
-	            id);
-      fprintf(stderr, "       any identifier in gen-file.\n");
-      exit(1);
+    id = -1;
+    area = -1.0;
+    sscanf(line, "%d%*[, ]%lf", &id, &area);
+    if(id != -1 && area != -1.0){
+      if (id>max_id || region_id_inv[id]<0) {
+        fprintf(stderr, "ERROR: Identifier %d in area-file does not match\n",
+         id);
+        fprintf(stderr, "       any identifier in map-file.\n");
+        exit(1);
+      }
+      target_area[region_id_inv[id]] = area;
+    }else if(id != -1 && area == -1.0){
+      char tmpchar1 = '\0', tmpchar2 = '\0';
+      sscanf(line, "%*d%*[, ]%c%c", &tmpchar1, &tmpchar2);
+      if(tmpchar1 == 'N' && tmpchar2 == 'A'){
+        target_area[region_id_inv[id]] = -2.0;
+        region_na[region_id_inv[id]] = 1;
+      }
     }
-    target_area[region_id_inv[id]] = area;
   }
-  fclose(area_file);
-  for (i=0; i<n_reg; i++)
-    if (target_area[i] < 0.0) {
+
+  if (area_file != stdin){
+    fclose(area_file);
+  }
+
+  for (i=0; i<n_reg; i++){
+    if (target_area[i] < 0.0 && target_area[i] != -2.0) {
       fprintf(stderr, "ERROR: No target area for region %d.\n", region_id[i]);
       exit(1);
     }
+  }
+
+  if (eps){
+    ps_figure("map.eps", polycorn, proj, FALSE);
+  }
 
   /****** Replace target areas equal to zero by a small positive value. ******/
-
-  min_area = target_area[0];
-  for (i=1; i<n_reg; i++)
-    if (target_area[i] > 0.0)
-      min_area = MIN(min_area, target_area[i]);
-  for (i=0; i<n_reg; i++)
-    if (target_area[i] == 0.0)
-      target_area[i] = MIN_POP_FAC * min_area;
-
-  /**************** Calculate all initial areas and densities. ***************/
-
-  for (i=0; i<n_reg; i++)
-    for (j=0; j<n_polyinreg[i]; j++)
+  int na_ctr = 0;
+  double tmp_tot_target_area = 0.0;
+  tot_init_area = 0.0;
+  for (i=0; i<n_reg; i++){
+    if (region_na[i] == 1){
+      na_ctr++;
+    }else{
+      tmp_tot_target_area += target_area[i];
+    }
+    for (j=0; j<n_polyinreg[i]; j++){
       init_area[i] += polygon_area(n_polycorn[polyinreg[i][j]],
-				   polycorn[polyinreg[i][j]]);
-  for (i=0; i<n_reg; i++)
-    dens[i] = target_area[i] / init_area[i];
-
-  /******************** Calculate the "average density" = ********************/
-  /**************** (total target area)/(total initial area). ****************/
-
-  for (i=0, tot_init_area=0.0; i<n_reg; i++)
+           polycorn[polyinreg[i][j]]);
+    }
     tot_init_area += init_area[i];
-  for (i=0, tot_target_area=0.0; i<n_reg; i++)
+  }
+  
+  /****** Calculate region perimeter *********/
+  for(i=0; i<n_reg; i++){
+    for (j=0; j<n_polyinreg[i]; j++){
+      region_perimeter[i] += polygon_perimeter(n_polycorn[polyinreg[i][j]],
+       polycorn[polyinreg[i][j]]);
+    }
+  }
+  int first_region = 1;
+  double total_NA_ratio = 0;
+
+  for(i=0; i<n_reg; i++){
+    if(region_na[i] == 1){
+      total_NA_ratio += init_area[i] / tot_init_area;
+    }
+  }
+  
+  double total_NA_area = (total_NA_ratio * tmp_tot_target_area) / (1 - total_NA_ratio);
+  tmp_tot_target_area += total_NA_area;
+
+  for (i=0; i<n_reg; i++){
+    /****** Set target area for regions with NA values *******/
+    if(region_na[i] == 1){
+      if(first_region == 1){
+        fprintf(stderr, "\nSetting area for NA regions:\n");
+        first_region = 0;
+      }
+      target_area[i] = (init_area[i] / tot_init_area) / total_NA_ratio * total_NA_area;
+      fprintf(stderr, "%d: %lf\n", region_id[i], target_area[i]);
+    }
+  }
+
+  fprintf(stderr, "\n");
+
+  /****** Increase target area for regions which will be too small in order to speed ******/
+  /****** up cartogram generation process. This happens when -n flag is not set      ******/
+  if(use_perimeter_threshold == TRUE){
+    fprintf(stderr, "Note: Enlarging extremely small regions using scaled");
+    fprintf(stderr, " perimeter threshold. Areas for these regions will be");
+    fprintf(stderr, " scaled up. To disable this, please add the -n flag.\n\n");
+    int *region_small = (int*) calloc(n_reg, sizeof(int));
+    int region_small_ctr = 0;
+    double *region_threshold, *region_threshold_area, tot_region_small_area = 0,
+      total_perimeter = 0, total_threshold = 0;
+    region_threshold = (double*) calloc(n_reg, sizeof(double));
+    region_threshold_area = (double*) calloc(n_reg, sizeof(double));
+    for(i=0; i<n_reg; i++){
+      total_perimeter += region_perimeter[i];
+    }
+    for(i=0; i<n_reg; i++){
+      region_threshold[i] = MAX((region_perimeter[i]/total_perimeter) * MIN_PERIMETER_FAC, 0.00025);
+      if((target_area[i]/tmp_tot_target_area < region_threshold[i])){
+        region_small[i] = 1;
+        region_small_ctr++;
+        tot_region_small_area += target_area[i];
+      }
+    }
+    for (i=0; i<n_reg; i++){
+      if(region_small[i] == 1){
+        total_threshold += region_threshold[i];
+      }
+    }
+    double total_threshold_area = (total_threshold * (tmp_tot_target_area - tot_region_small_area)) / (1 - total_threshold);
+
+    if(region_small_ctr > 0){
+      fprintf(stderr, "Enlarging small regions:\n");
+    }
+
+    for(i=0; i<n_reg; i++){
+      if(region_small[i] == 1){
+        region_threshold_area[i] = (region_threshold[i]/total_threshold) * total_threshold_area;
+        double old_target_area = target_area[i];
+        target_area[i] = region_threshold_area[i];
+        tmp_tot_target_area += target_area[i];
+        tmp_tot_target_area -= old_target_area;
+        fprintf(stderr, "%d: %lf\n", region_id[i], target_area[i]);
+      }
+    }
+    if(region_small_ctr > 0){
+      fprintf(stderr, "\n");
+    }else{
+      fprintf(stderr, "No regions below minimum threshold.\n\n");
+    }
+    free(region_small);
+  }else{
+    /* If -n flag is set, regions with zero area will be replaced by MIN_POP_FAC * min_area */
+    fprintf(stderr, "Note: Not using scaled perimeter threshold.\n\n");
+    double min_area = target_area[0];
+    for (i=1; i<n_reg; i++){
+      if (target_area[i] > 0.0){
+        min_area = MIN(min_area, target_area[i]);
+      }
+    }
+    for (i=0; i<n_reg; i++){
+      if (target_area[i] == 0.0){
+        target_area[i] = MIN_POP_FAC * min_area;
+      }
+    }
+  }
+  
+  /**************** Calculate all densities ***************/
+
+  for (i=0; i<n_reg; i++){
+    dens[i] = target_area[i] / init_area[i];
+  }
+
+  for (i=0, tot_target_area=0.0; i<n_reg; i++){
     tot_target_area += target_area[i];
+  }
   avg_dens = tot_target_area / tot_init_area;
+
 
   /***** Allocate memory for the Fourier transform of the input density. *****/
 
@@ -354,16 +470,16 @@ void fill_with_density1 (char *gen_file_name, char *area_file_name,
   for (i=0; i<lx; i++)
     for (j=0; j<ly; j++) {
       if (xyhalfshift2reg[i][j]==-1)
-	rho_init[i*ly+j] = avg_dens;
+  rho_init[i*ly+j] = avg_dens;
       else
-	rho_init[i*ly+j] = dens[xyhalfshift2reg[i][j]];
+  rho_init[i*ly+j] = dens[xyhalfshift2reg[i][j]];
     }
 
   /*** Plan the Fourier transform already now so that it can be shared with **/
   /*** gaussian_blur().                                                     **/
 
   plan_fwd = fftw_plan_r2r_2d(lx, ly, rho_init, rho_ft,
-  			  FFTW_REDFT10, FFTW_REDFT10, FFTW_ESTIMATE);
+          FFTW_REDFT10, FFTW_REDFT10, FFTW_ESTIMATE);
 
   /** Smoothen the density profile to avoid uncontrolled distortions around **/
   /** the edges of the polygons.                                            **/
@@ -387,7 +503,7 @@ void fill_with_density1 (char *gen_file_name, char *area_file_name,
   free(dens);
   free(init_area);
 
-  return;
+  return FALSE;        /* The statement "there is only one region" is false. */
 }
 
 /*****************************************************************************/
@@ -427,7 +543,7 @@ void fill_with_density2 (void)
   for (i=0; i<n_reg; i++)
     for (j=0; j<n_polyinreg[i]; j++)
       tmp_area[i] +=
-	polygon_area(n_polycorn[polyinreg[i][j]], polycorn[polyinreg[i][j]]);
+  polygon_area(n_polycorn[polyinreg[i][j]], polycorn[polyinreg[i][j]]);
   for (i=0; i<n_reg; i++) dens[i] = target_area[i] / tmp_area[i];
 
   /******************** Calculate the "average density" = ********************/
@@ -444,9 +560,9 @@ void fill_with_density2 (void)
   for (i=0; i<lx; i++)
     for (j=0; j<ly; j++) {
       if (xyhalfshift2reg[i][j]==-1)
-	rho_init[i*ly+j] = avg_dens;
+  rho_init[i*ly+j] = avg_dens;
       else
-	rho_init[i*ly+j] = dens[xyhalfshift2reg[i][j]];
+  rho_init[i*ly+j] = dens[xyhalfshift2reg[i][j]];
     }
   fftw_execute(plan_fwd);
 
