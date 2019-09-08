@@ -90,7 +90,8 @@ No additional dependencies. Your default `apt-get` package manager should work f
 
 2. Run the provided automatic build script. This will install the required dependencies and run configure and make for you:
 ```
-sudo ./autobuild.sh
+chmod +x autobuild.sh
+./autobuild.sh
 ```
 
 3. The `cartogram` executable can be found in the root directory of the repository. To add the generator to your list of binaries, and access it outside this directory, please run the following command:
