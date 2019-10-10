@@ -152,7 +152,13 @@ The generated cartogram will be saved in the same format as the map input in the
 
 ### Examples
 
-For the 2016 US presidential election data, navigate to the `sample_data/` directory, and run the following command. Note that the sample data has **already been processed** using `cartogram -p`
+For the 2016 US presidential election data, navigate to the `sample_data/` directory.
+
+```
+cd sample_data/
+```
+
+Then run the following command. Note that the sample data has **already been processed** using `cartogram -p`
 ```
 cartogram -g usa_contiguous_arcgis.json -a usa_contiguous_electors.csv
 ```
