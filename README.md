@@ -85,7 +85,7 @@ You must have `Xcode Command Line Tools` and the `brew` package manager <a href=
 No additional dependencies. Your default `apt-get` package manager should work fine.
 
 #### Windows
-1. Install <a href="">cygwin</a> including standard devel, lib, and math tools (cmake, make, fftw, gcc, and pkg-config).
+1. Install <a href="https://cygwin.com/install.html">cygwin</a> including standard devel, lib, and math tools (cmake, make, fftw, gcc, and pkg-config).
 2. Download the source code for <a href="https://github.com/DaveGamble/cJSON"> cJSON </a> and follow the instructons to compile and link with pkg-config using the cygwin directory structure:
 
 ```
