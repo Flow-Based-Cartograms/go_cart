@@ -87,14 +87,23 @@ No additional dependencies. Your default `apt-get` package manager should work f
 #### Windows
 1. Install <a href="https://cygwin.com/install.html">cygwin</a> including the base and devel categories along with fftw3 and fftw3-devel.
 2. Download the source code for <a href="https://github.com/DaveGamble/cJSON"> cJSON </a> and follow the instructons to compile and link with pkg-config using the cygwin directory structure:
-
-```
-mkdir build
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=/
-make install
-```
-
+    ```
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_INSTALL_PREFIX=/
+    make
+    make install
+    ```
+3.  You may need to convert newline characters in the go-cart main directory:
+    ```
+    dos2unix autogen.sh
+    dos2unix autobuild.sh
+    ```
+4. Run autogen:
+    ```
+   ./autogen.sh
+    ```
+5. Follow the build instructions below for macOS & Linux
 ### Building (macOS & Linux)
 
 1. Open a terminal, clone the repository, and navigate to its root directory.
