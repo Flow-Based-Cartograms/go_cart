@@ -81,16 +81,15 @@ Region.Id,Region.Data,Region.Name
 #### macOS
 You must have `Xcode Command Line Tools` and the `brew` package manager <a href="https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/" title="How to install Xcode CLT & brew?" target="\_blank">installed</a> (and updated) on your computer.
 
-#### Ubuntu/Debian Linux & Windows 10
+#### Ubuntu/Debian Linux
 
 No additional dependencies. Your default `apt-get` package manager should work fine.
 
-### Building (Window 10)
+#### Windows 10
 
-1. Enable Linux on your machine and install Ubuntu following <a href='https://itsfoss.com/install-bash-on-windows/'>these instructions</a>.
-2. Follow instructions below for building on Linux
+Install Bash for Windows 10 following <a href='https://itsfoss.com/install-bash-on-windows/'>these instructions</a>. Use this Bash terminal in the build steps.
 
-### Building (macOS & Linux)
+### Building (macOS, Linux, & Windows 10)
 
 1. Open a terminal, clone the repository, and navigate to its root directory.
 
@@ -258,7 +257,7 @@ sudo apt-get install build-essential
 $ ./autogen.sh && ./configure && make
 ```
 
-#### Windows
+#### Windows: Older Versions
 If you have an earlier edition of Windows you can still build `cartogram`: 
 
 1. Install <a href="https://cygwin.com/install.html">cygwin</a> including the base and devel categories along with fftw3 and fftw3-devel.
