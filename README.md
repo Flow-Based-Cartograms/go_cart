@@ -89,7 +89,30 @@ No additional dependencies. Your default `apt-get` package manager should work f
 
 Install Bash for Windows 10 following <a href='https://itsfoss.com/install-bash-on-windows/'>these instructions</a>. Use this Bash terminal in the build steps.
 
-### Building (macOS, Linux, & Windows 10)
+#### Windows: Older Versions
+If you have an earlier edition of Windows you can still build `cartogram`: 
+
+1. Install <a href="https://cygwin.com/install.html">cygwin</a> including the base and devel categories along with fftw3 and fftw3-devel.
+2. Download the source code for <a href="https://github.com/DaveGamble/cJSON"> cJSON </a> and, using the cygwin terminal, follow the instructons to compile and link with pkg-config using the cygwin directory structure:
+    ```
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_INSTALL_PREFIX=/
+    make
+    make install
+    ```
+3.  You may need to convert newline characters in the go-cart main directory:
+    ```
+    dos2unix autogen.sh
+    dos2unix autobuild.sh
+    ```
+4. Run autogen:
+    ```
+   ./autogen.sh
+    ```
+Use the cygwin terminal in the build steps
+
+### Building (macOS, Linux, & Windows)
 
 1. Open a terminal, clone the repository, and navigate to its root directory.
 
@@ -256,29 +279,6 @@ sudo apt-get install build-essential
 ```
 $ ./autogen.sh && ./configure && make
 ```
-
-#### Windows: Older Versions
-If you have an earlier edition of Windows you can still build `cartogram`: 
-
-1. Install <a href="https://cygwin.com/install.html">cygwin</a> including the base and devel categories along with fftw3 and fftw3-devel.
-2. Download the source code for <a href="https://github.com/DaveGamble/cJSON"> cJSON </a> and follow the instructons to compile and link with pkg-config using the cygwin directory structure:
-    ```
-    mkdir build
-    cd build
-    cmake .. -DCMAKE_INSTALL_PREFIX=/
-    make
-    make install
-    ```
-3.  You may need to convert newline characters in the go-cart main directory:
-    ```
-    dos2unix autogen.sh
-    dos2unix autobuild.sh
-    ```
-4. Run autogen:
-    ```
-   ./autogen.sh
-    ```
-5. Follow the build instructions below for macOS & Linux
 
 #### Error (macOS): Don't understand 'm' flag!
 
