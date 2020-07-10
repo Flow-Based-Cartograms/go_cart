@@ -53,18 +53,18 @@ typedef struct {
 
 /* Variables for map. */
 
-double *area_err, *cart_area, map_maxx, map_maxy, map_minx, map_miny,
+extern double *area_err, *cart_area, map_maxx, map_maxy, map_minx, map_miny,
   *target_area, *region_perimeter;
-int max_id, n_poly, *n_polycorn, *n_polyinreg, n_reg, *polygon_id, *poly_is_hole,
+extern int max_id, n_poly, *n_polycorn, *n_polyinreg, n_reg, *polygon_id, *poly_is_hole,
   **polyinreg, *region_id, *region_id_inv, *region_na;
-POINT **cartcorn, **origcorn, **polycorn, *proj, *proj2;
-BOOLEAN use_perimeter_threshold;
+extern POINT **cartcorn, **origcorn, **polycorn, *proj, *proj2;
+extern BOOLEAN use_perimeter_threshold;
 
 /* Variables for digitizing the density. */
 
-double *rho_ft, *rho_init;
-fftw_plan plan_fwd;
-int lx, ly;
+extern double *rho_ft, *rho_init;
+extern fftw_plan plan_fwd;
+extern int lx, ly;
 
 /**************************** Function prototypes. ***************************/
 
