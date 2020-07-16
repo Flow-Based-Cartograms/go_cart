@@ -12,9 +12,13 @@
 #define INC_AFTER_ACC (1.1)
 #define DEC_AFTER_NOT_ACC (0.75)
 
+/***************************** Local variables. ******************************/
+
+static double *gridvx, *gridvy;
+
 /***************************** Global variables. *****************************/
 
-double *gridvx, *gridvy, *grid_fluxx_init, *grid_fluxy_init;
+double *grid_fluxx_init, *grid_fluxy_init;
 fftw_plan plan_grid_fluxx_init, plan_grid_fluxy_init;
 
 /**************************** Function prototypes. ***************************/

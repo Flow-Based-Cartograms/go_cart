@@ -15,9 +15,13 @@
 #define MIN_T (1e3)
 #define MAX_T (1e12)
 
+/***************************** Local variables. ******************************/
+
+static double *gridvx, *gridvy;
+
 /***************************** Global variables. *****************************/
 
-double *gridvx, *gridvy, *rho;
+double *rho;
 fftw_plan plan_gridvx, plan_gridvy, plan_rho;
 
 /**************************** Function prototypes. ***************************/
