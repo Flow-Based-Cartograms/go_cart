@@ -1,50 +1,50 @@
-Region.Id,Region.Data,Region.Name
-1,9,Alabama
-2,11,Arizona
-3,6,Arkansas
-4,55,California
-5,9,Colorado
-6,7,Connecticut
-7,3,Delaware
-8,3,District of Columbia
-9,29,Florida
-10,16,Georgia
-11,4,Idaho
-12,20,Illinois
-13,11,Indiana
-14,6,Iowa
-15,6,Kansas
-16,8,Kentucky
-17,8,Louisiana
-18,4,Maine
-19,10,Maryland
-20,11,Massachusetts
-21,16,Michigan
-22,10,Minnesota
-23,6,Mississippi
-24,10,Missouri
-25,3,Montana
-26,5,Nebraska
-27,6,Nevada
-28,4,New Hampshire
-29,14,New Jersey
-30,5,New Mexico
-31,29,New York
-32,15,North Carolina
-33,3,North Dakota
-34,18,Ohio
-35,7,Oklahoma
-36,7,Oregon
-37,20,Pennsylvania
-38,4,Rhode Island
-39,9,South Carolina
-40,3,South Dakota
-41,11,Tennessee
-42,38,Texas
-43,6,Utah
-44,3,Vermont
-45,13,Virginia
-46,12,Washington
-47,5,West Virginia
-48,10,Wisconsin
-49,3,Wyoming
+Region.Id,Region.Data,Region.Name,Color.R,Color.G,Color.B
+1,9,Alabama,231.0,41.0,138.0
+2,11,Arizona,217.0,95.0,2.0
+3,6,Arkansas,27.0,158.0,119.0
+4,55,California,231.0,41.0,138.0
+5,9,Colorado,117.0,112.0,179.0
+6,7,Connecticut,27.0,158.0,119.0
+7,3,Delaware,230.0,171.0,2.0
+8,3,District of Columbia,231.0,41.0,138.0
+9,29,Florida,230.0,171.0,2.0
+10,16,Georgia,117.0,112.0,179.0
+11,4,Idaho,117.0,112.0,179.0
+12,20,Illinois,102.0,166.0,30.0
+13,11,Indiana,117.0,112.0,179.0
+14,6,Iowa,117.0,112.0,179.0
+15,6,Kansas,217.0,95.0,2.0
+16,8,Kentucky,231.0,41.0,138.0
+17,8,Louisiana,217.0,95.0,2.0
+18,4,Maine,27.0,158.0,119.0
+19,10,Maryland,27.0,158.0,119.0
+20,11,Massachusetts,231.0,41.0,138.0
+21,16,Michigan,230.0,171.0,2.0
+22,10,Minnesota,102.0,166.0,30.0
+23,6,Mississippi,102.0,166.0,30.0
+24,10,Missouri,230.0,171.0,2.0
+25,3,Montana,230.0,171.0,2.0
+26,5,Nebraska,27.0,158.0,119.0
+27,6,Nevada,102.0,166.0,30.0
+28,4,New Hampshire,117.0,112.0,179.0
+29,14,New Jersey,217.0,95.0,2.0
+30,5,New Mexico,27.0,158.0,119.0
+31,29,New York,230.0,171.0,2.0
+32,15,North Carolina,27.0,158.0,119.0
+33,3,North Dakota,217.0,95.0,2.0
+34,18,Ohio,102.0,166.0,30.0
+35,7,Oklahoma,231.0,41.0,138.0
+36,7,Oregon,217.0,95.0,2.0
+37,20,Pennsylvania,117.0,112.0,179.0
+38,4,Rhode Island,217.0,95.0,2.0
+39,9,South Carolina,217.0,95.0,2.0
+40,3,South Dakota,231.0,41.0,138.0
+41,11,Tennessee,230.0,171.0,2.0
+42,38,Texas,230.0,171.0,2.0
+43,6,Utah,231.0,41.0,138.0
+44,3,Vermont,102.0,166.0,30.0
+45,13,Virginia,217.0,95.0,2.0
+46,12,Washington,27.0,158.0,119.0
+47,5,West Virginia,230.0,171.0,2.0
+48,10,Wisconsin,231.0,41.0,138.0
+49,3,Wyoming,102.0,166.0,30.0

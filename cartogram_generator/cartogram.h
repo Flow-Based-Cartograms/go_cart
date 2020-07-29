@@ -40,14 +40,22 @@ typedef struct {      /* Useful structure for coordinates in two dimensions. */
   double x;
   double y;
 } POINT;
+
 typedef enum {          /* Declares an enumeration data type called BOOLEAN. */
   FALSE,                /* FALSE = 0, TRUE = 1 */
   TRUE
-} BOOLEAN; 
+} BOOLEAN;
+
 typedef struct {
   char name[100];
   int id;
 } name_id_pair;
+
+typedef struct rgb {
+  double r;
+  double g;
+  double b;
+} rgb_color;
 
 /***************************** Global variables. *****************************/
 
@@ -65,6 +73,7 @@ extern BOOLEAN use_perimeter_threshold;
 extern double *rho_ft, *rho_init;
 extern fftw_plan plan_fwd;
 extern int lx, ly;
+extern rgb_color* color;
 
 /**************************** Function prototypes. ***************************/
 

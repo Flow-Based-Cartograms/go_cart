@@ -35,7 +35,7 @@ void ps_figure (char *ps_name, POINT **corn, POINT *prj, BOOLEAN grat)
   
   /**************************** Plot the regions. ****************************/
   
-  fprintf(ps_file, "0.7 SLW\n");
+  fprintf(ps_file, "0.3 SLW\n");
   for (i=0; i<n_reg; i++) {
     fprintf(ps_file, "n\n");
     for (j=0; j<n_polyinreg[i]; j++) {
@@ -47,7 +47,7 @@ void ps_figure (char *ps_name, POINT **corn, POINT *prj, BOOLEAN grat)
       fprintf(ps_file, "c\n");
     }
     if(region_na[i] == 0){
-      fprintf(ps_file, "gsave\n0.96 0.92 0.70 SRGB f\ngrestore\n0 SGRY s\n");
+      fprintf(ps_file, "gsave\n%lf %lf %lf SRGB f\ngrestore\n0 SGRY s\n", color[i].r, color[i].g, color[i].b);
     }else{
       fprintf(ps_file, "gsave\n0.75 SGRY f\ngrestore\n0 SGRY s\n");
     }
