@@ -300,9 +300,9 @@ BOOLEAN fill_with_density1 (char *map_file_name, char *area_file_name,
   while (fgets(line, MAX_STRING_LENGTH, area_file) != NULL) {
     id = -1;
     area = -1.0;
-    r = 0.96;  
-    g = 0.92;
-    b = 0.70;
+    r = 245.0;  
+    g = 235.0;
+    b = 179.0;
     sscanf(line, "%d%*[, ]%lf%*[, a-zA-Z]%lf%*[, ]%lf%*[, ]%lf", &id, &area, &r, &g, &b);
     if(id != -1 && area != -1.0){
       if (id>max_id || region_id_inv[id]<0) {
