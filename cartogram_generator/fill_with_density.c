@@ -242,7 +242,8 @@ BOOLEAN fill_with_density1 (char *map_file_name, char *area_file_name,
 {
   char line[MAX_STRING_LENGTH];
   double area, avg_dens, *dens, *init_area, tot_init_area,
-          tot_target_area;
+          tot_target_area, r, g, b;;
+
   FILE *area_file;
   int i, id, j;
 
@@ -250,11 +251,12 @@ BOOLEAN fill_with_density1 (char *map_file_name, char *area_file_name,
 
   read_map(map_file_name);
 
-  /*************** Allocate memory for the area and area error. **************/
+  /******* Allocate memory for the area and area error and the color *********/
   
   cart_area = (double*) malloc(n_reg * sizeof(double));
   area_err = (double*) malloc(n_reg * sizeof(double));
   target_area = (double*) malloc(n_reg * sizeof(double));
+  color = (rgb_color*) malloc(n_reg * sizeof(rgb_color));
 
   /***************** Fit the map on an (lx)*(ly)-square grid. ****************/
 
@@ -286,7 +288,7 @@ BOOLEAN fill_with_density1 (char *map_file_name, char *area_file_name,
 
   interior();
 
-  /*********************** Read target areas from file. **********************/
+  /************ Read target areas and color information from file. ***********/
 
   for (i=0; i<n_reg; i++) target_area[i] = -1.0;
   if (area_file_name == NULL){
@@ -298,7 +300,10 @@ BOOLEAN fill_with_density1 (char *map_file_name, char *area_file_name,
   while (fgets(line, MAX_STRING_LENGTH, area_file) != NULL) {
     id = -1;
     area = -1.0;
-    sscanf(line, "%d%*[, ]%lf", &id, &area);
+    r = 245.0;  
+    g = 235.0;
+    b = 179.0;
+    sscanf(line, "%d%*[, ]%lf%*[, a-zA-Z]%lf%*[, ]%lf%*[, ]%lf", &id, &area, &r, &g, &b);
     if(id != -1 && area != -1.0){
       if (id>max_id || region_id_inv[id]<0) {
         fprintf(stderr, "ERROR: Identifier %d in area-file does not match\n",
@@ -307,6 +312,9 @@ BOOLEAN fill_with_density1 (char *map_file_name, char *area_file_name,
         exit(1);
       }
       target_area[region_id_inv[id]] = area;
+      color[region_id_inv[id]].r = r/255.0;
+      color[region_id_inv[id]].g = g/255.0;
+      color[region_id_inv[id]].b = b/255.0;
     }else if(id != -1 && area == -1.0){
       char tmpchar1 = '\0', tmpchar2 = '\0';
       sscanf(line, "%*d%*[, ]%c%c", &tmpchar1, &tmpchar2);

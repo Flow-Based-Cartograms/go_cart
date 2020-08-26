@@ -80,6 +80,7 @@ BOOLEAN use_perimeter_threshold;
 double *rho_ft, *rho_init;
 fftw_plan plan_fwd;
 int lx, ly;
+rgb_color* color;
 
 /**************************** Function prototype. ****************************/
 
