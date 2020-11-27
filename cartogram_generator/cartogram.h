@@ -65,7 +65,7 @@ extern double *area_err, *cart_area, map_maxx, map_maxy, map_minx, map_miny,
   *target_area, *region_perimeter;
 extern int max_id, n_poly, *n_polycorn, *n_polyinreg, n_reg, *polygon_id, *poly_is_hole,
   **polyinreg, *region_id, *region_id_inv, *region_na;
-extern POINT **cartcorn, **origcorn, **polycorn, *proj, *proj2;
+extern POINT **cartcorn, **origcorn, **polycorn, *proj, *proj2, *projtmp;
 extern BOOLEAN use_perimeter_threshold;
 
 /* Variables for digitizing the density. */

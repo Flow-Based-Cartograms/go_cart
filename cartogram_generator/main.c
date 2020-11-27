@@ -72,7 +72,8 @@ double *cart_area, map_maxx, map_maxy, map_minx, map_miny,
 
 int max_id, n_poly, *n_polycorn, *n_polyinreg, n_reg, *polygon_id, *poly_is_hole,
         **polyinreg, *region_id, *region_id_inv, *region_na;
-POINT **cartcorn, **origcorn, **polycorn, *proj, *proj2;
+size_t projsize;
+POINT **cartcorn, **origcorn, **polycorn, *proj, *proj2, *projtmp, *projinit;
 BOOLEAN use_perimeter_threshold;
 
 /* Variables for digitizing the density. */
@@ -262,20 +263,23 @@ int main (int argc, char* argv[])
   }
   
   /*************** Allocate memory for the projected positions. **************/
-  
-  proj = (POINT*) malloc(lx * ly * sizeof(POINT));
+
+  projsize = lx * ly * sizeof(POINT);
+  proj = (POINT*) malloc(projsize);
   cartcorn = (POINT**) malloc(n_poly * sizeof(POINT*));
   for (i=0; i<n_poly; i++)
     cartcorn[i] = (POINT*) malloc(n_polycorn[i] * sizeof(POINT));
   
   /* proj[i*ly+j] will store the current position of the point that started  */
   /* at (i+0.5, j+0.5).                                                      */
-  
-  for (i=0; i<lx; i++)
-    for (j=0; j<ly; j++) {
-      proj[i*ly + j].x = i + 0.5;
-      proj[i*ly + j].y = j + 0.5;
+  projinit = (POINT*) malloc(projsize);
+  for (i = 0; i < lx; i++) {
+    for (j = 0; j < ly; j++) {
+      projinit[i * ly + j].x = i + 0.5;
+      projinit[i * ly + j].y = j + 0.5;
     }
+  }
+  memcpy(proj, projinit, projsize);
   
   /************** First integration of the equations of motion. **************/
   
@@ -290,24 +294,18 @@ int main (int argc, char* argv[])
   
   /********* Additional integrations to come closer to target areas. *********/
   
-  proj2 = (POINT*) malloc(lx * ly * sizeof(POINT));
+  proj2 = (POINT*) malloc(projsize);
   integration = 1;  
   while (mae > MAX_PERMITTED_AREA_ERROR) {
     fill_with_density2();
     
     /* Copy the current graticule before resetting. We will construct the    */
     /* final graticule by interpolating proj2 on the basis of proj.          */
-    
-    for (i=0; i<lx; i++)
-      for (j=0; j<ly; j++) {
-	proj2[i*ly + j].x = proj[i*ly + j].x;
-	proj2[i*ly + j].y = proj[i*ly + j].y;
-      }
-    for (i=0; i<lx; i++)
-      for (j=0; j<ly; j++) {
-      	proj[i*ly + j].x = i + 0.5;
-      	proj[i*ly + j].y = j + 0.5;
-      }
+
+    projtmp = proj2;
+    proj2 = proj;
+    proj = projtmp;
+    memcpy(proj, projinit, projsize);
     integration++;
     fprintf(stderr, "Starting integration %d\n", integration);
     if (!diff)
@@ -317,12 +315,10 @@ int main (int argc, char* argv[])
     project(TRUE);     /* TRUE because we need to project the graticule too. */
 
     /* Overwrite proj with proj2. */
-    
-    for (i=0; i<lx; i++)
-      for (j=0; j<ly; j++) {
-      	proj[i*ly + j].x = proj2[i*ly + j].x;
-      	proj[i*ly + j].y = proj2[i*ly + j].y;
-      }
+
+    projtmp = proj;
+    proj = proj2;
+    proj2 = projtmp;
     mae = max_area_err(area_err, cart_area, cartcorn, &cart_tot_area);
     fprintf(stderr, "max. abs. area error: %f\n", mae);
   }
