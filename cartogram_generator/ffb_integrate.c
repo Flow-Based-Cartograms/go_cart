@@ -326,10 +326,12 @@ void ffb_integrate (void)
     
     t += delta_t;
     iter++;
-    for (k=0; k<lx*ly; k++) {
-      proj[k].x = mid[k].x;
-      proj[k].y = mid[k].y;
-    }
+
+    /* swap pointers for next iteration */
+    projtmp = proj;
+    proj = mid;
+    mid = projtmp;
+
     delta_t *= INC_AFTER_ACC;           /* Try a larger step size next time. */
     
   } while (t < 1.0);
