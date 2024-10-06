@@ -1,3 +1,5 @@
+**IMPORTANT: This repository is no longer actively maintained. A more advanced version of the software, rewritten in C++ and still utilizing Gastner et al.'s (2018) fast flow-based method as of 2024-10-06, is now available at https://github.com/mgastner/cartogram-cpp. We highly recommend that users interested in our cartogram generator switch to the updated repository.**
+
 # Flow-Based Cartogram Generator
 
 <p align="center">
