@@ -203,14 +203,14 @@ void output_to_geojson (BOOLEAN usestd, POINT **corn, char *map_file_name)
         n_holes++;
       }
     }
-    if((n_polyinreg[k] - n_holes) > 1){
+    if(1) {//(n_polyinreg[k] - n_holes) > 1){
       cJSON_AddStringToObject(geometry, "type", "MultiPolygon");
       cJSON *multipolygon_array_of_polygons = cJSON_AddArrayToObject(geometry, "coordinates");
       cJSON *polygon_array_of_linear_rings = NULL;
       for(int l=0; l < n_polyinreg[k];l++){
         int polypos = polyinreg[k][l];
 
-        if(!poly_is_hole[polypos]){
+        if(1) {//!poly_is_hole[polypos]){
           polygon_array_of_linear_rings = cJSON_CreateArray();
           cJSON_AddItemToArray(multipolygon_array_of_polygons, polygon_array_of_linear_rings);
           cJSON *linear_ring_array_of_positions = cJSON_CreateArray();
@@ -260,6 +260,7 @@ void output_to_geojson (BOOLEAN usestd, POINT **corn, char *map_file_name)
       }
     }else{
       fprintf(stderr, "Error with polygons while writing GeoJSON file. n_polyinreg[%d] = %d while n_holes = %d\n", k, n_polyinreg[k], n_holes);
+      ;
     }
   }
   cJSON_AddItemToArray(bbox, cJSON_CreateNumber(cart_minx));
